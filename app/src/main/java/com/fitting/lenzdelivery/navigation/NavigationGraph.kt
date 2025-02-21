@@ -1,5 +1,6 @@
 package com.fitting.lenzdelivery.navigation
 
+import android.content.SharedPreferences
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.tween
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.composable
 import com.fitting.lenzdelivery.DeliveryViewModel
+import com.fitting.lenzdelivery.DeliveryViewModelFactory
 import com.fitting.lenzdelivery.screens.EarningsScreen
 import com.fitting.lenzdelivery.screens.PickupDetails
 import com.fitting.lenzdelivery.screens.PickupScreen
@@ -42,9 +44,14 @@ import com.fitting.lenzdelivery.screens.component_holders.PaymentsHistory
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MyApp() {
+fun MyApp(
+    sharedPref: SharedPreferences
+) {
+    val riderId: String? = sharedPref.getString("riderId", "")
 
-    val deliveryViewModelInstance: DeliveryViewModel = viewModel()
+    val deliveryViewModelInstance: DeliveryViewModel = viewModel(
+        factory = riderId?.let {id -> DeliveryViewModelFactory(id) }
+    )
 
     if(deliveryViewModelInstance.allRiders.isEmpty()) {
         Column(

@@ -10,7 +10,7 @@ import com.fitting.lenzdelivery.screens.components.PickupItem
 @Composable
 fun PickupScreen(
     deliveryViewModel: DeliveryViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
     val eligibleOrders = deliveryViewModel.allGroupOrders.filter {
         (it.trackingStatus == "Internal Tracking") || it.trackingStatus == "Order Placed For Pickup"
@@ -27,8 +27,6 @@ fun PickupScreen(
             orderMap[pickupKey] = (orderMap.getValue(pickupKey) + 1)
         }
     }
-
-    println(orderMap.toString())
 
     Column {
         PickupItem(

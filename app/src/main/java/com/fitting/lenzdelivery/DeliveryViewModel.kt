@@ -1,6 +1,5 @@
 package com.fitting.lenzdelivery
 
-import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -18,7 +17,9 @@ import com.fitting.lenzdelivery.network.WebSocketManager
 import com.fitting.lenzdelivery.network.deliveryService
 import kotlinx.coroutines.launch
 
-class DeliveryViewModel : ViewModel() {
+class DeliveryViewModel(
+    riderId: String
+) : ViewModel() {
     private val _deliveryService = deliveryService
 
     private val _groupOrders = mutableStateListOf<GroupOrderData>()
@@ -38,8 +39,9 @@ class DeliveryViewModel : ViewModel() {
 
     init {
         getGroupOrders()
-        connectSocket()
+//        connectSocket()
         getRiderDetails()
+        println(riderId + "  While Init")
     }
 
     fun getGroupOrders() {

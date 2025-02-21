@@ -1,5 +1,6 @@
 package com.fitting.lenzdelivery.auth
 
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.os.Build
 import android.widget.Toast
@@ -88,7 +89,9 @@ fun RiderLogIn(
     }
 
     if (loginConfirmation) {
-        MyApp()
+        MyApp(
+            sharedPref = sharedPref
+        )
     } else {
         Column(
             modifier = Modifier
