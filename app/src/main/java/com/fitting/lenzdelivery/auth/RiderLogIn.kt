@@ -72,12 +72,12 @@ fun RiderLogIn(
         }
     }
 
-    LaunchedEffect(confirmation) {
-        if (!confirmation) return@LaunchedEffect
-            prefEditor.putBoolean("isLoggedIn", true).apply()
-            loginConfirmation = sharedPref.getBoolean("isLoggedIn", false)
-            confirmation = false
-    }
+//    LaunchedEffect(confirmation) {
+//        if (!confirmation) return@LaunchedEffect
+//            prefEditor.putBoolean("isLoggedIn", true).apply()
+//            loginConfirmation = sharedPref.getBoolean("isLoggedIn", false)
+//            confirmation = false
+//    }
 
     LaunchedEffect(loginMessage) {
         when {
