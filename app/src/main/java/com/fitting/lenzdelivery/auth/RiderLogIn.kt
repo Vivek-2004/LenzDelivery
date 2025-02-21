@@ -38,7 +38,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.R
 import com.fitting.lenzdelivery.models.LogInRider
 import com.fitting.lenzdelivery.navigation.MyApp
@@ -51,7 +50,6 @@ import kotlinx.coroutines.withContext
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RiderLogIn(
-    deliveryViewModel: DeliveryViewModel,
     sharedPref: SharedPreferences,
     prefEditor: SharedPreferences.Editor
 ) {
@@ -63,15 +61,13 @@ fun RiderLogIn(
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var loginConfirmation by remember { mutableStateOf(false) }
-
     val MIN_LOADING_DISPLAY_TIME = 1300L
-    val loginMessage = deliveryViewModel.riderLogInMessage
-    var confirmation = loginMessage == "Login Successful"
+    var loginMessage by remember { mutableStateOf("") }
+    var confirmation = (loginMessage == "Login Successful")
+    var riderId by remember { mutableStateOf("") }
 
     if(confirmation) {
-        if (deliveryViewModel.loginRiderId.isNotEmpty()) {
-            prefEditor.putString("riderId", deliveryViewModel.loginRiderId).apply()
-        }
+            prefEditor.putString("riderId", riderId).apply()
     }
 
     LaunchedEffect(confirmation) {
@@ -86,15 +82,13 @@ fun RiderLogIn(
             (loginMessage == "Login Successful") -> { }
             loginMessage.isNotEmpty() -> {
                 Toast.makeText(context, loginMessage, Toast.LENGTH_SHORT).show()
-                deliveryViewModel.riderLogInMessage = ""
+                loginMessage = ""
             }
         }
     }
 
     if (loginConfirmation) {
-        MyApp(
-            deliveryViewModelInstance = deliveryViewModel
-        )
+        MyApp()
     } else {
         Column(
             modifier = Modifier
@@ -157,11 +151,17 @@ fun RiderLogIn(
                                 isLoading = true
                                 try {
                                     withContext(Dispatchers.IO) {
-                                        deliveryViewModel.riderLogin(
-                                            riderEmail = riderMail,
-                                            password = password
+                                        val response = deliveryService.logInRider(
+                                            loginBody = LogInRider(
+                                                riderEmail = riderMail,
+                                                password = password
+                                            )
                                         )
+                                        riderId = response.riderId
+                                        loginMessage = response.message
                                     }
+                                } catch (e: Exception) {
+                                    loginMessage = "Invalid ID or Password"
                                 } finally {
                                     val elapsedTime = System.currentTimeMillis() - startTime
                                     if (elapsedTime < MIN_LOADING_DISPLAY_TIME) {

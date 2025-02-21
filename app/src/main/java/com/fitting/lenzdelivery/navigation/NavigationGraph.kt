@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.composable
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.screens.EarningsScreen
@@ -41,7 +42,9 @@ import com.fitting.lenzdelivery.screens.component_holders.PaymentsHistory
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MyApp(deliveryViewModelInstance: DeliveryViewModel) {
+fun MyApp() {
+
+    val deliveryViewModelInstance: DeliveryViewModel = viewModel()
 
     if(deliveryViewModelInstance.allRiders.isEmpty()) {
         Column(

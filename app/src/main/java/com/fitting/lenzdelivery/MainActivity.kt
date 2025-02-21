@@ -34,12 +34,10 @@ class MainActivity : ComponentActivity() {
             val isLoggedIn by remember { mutableStateOf(sharedPref.getBoolean("isLoggedIn", false)) }
             LenZDeliveryTheme(darkTheme = false) {
                 if (isLoggedIn) {
-                    MyApp(
-                        deliveryViewModelInstance = deliveryViewModelInstance
-                    )
+                    MyApp()
                 } else {
                     RiderLogIn(
-                        deliveryViewModel = deliveryViewModelInstance,
+//                        deliveryViewModel = deliveryViewModelInstance,
                         sharedPref = sharedPref,
                         prefEditor = prefEditor
                     )
