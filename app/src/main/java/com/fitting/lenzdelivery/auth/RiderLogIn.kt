@@ -40,7 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.R
+import com.fitting.lenzdelivery.models.LogInRider
 import com.fitting.lenzdelivery.navigation.MyApp
+import com.fitting.lenzdelivery.network.deliveryService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -68,16 +70,16 @@ fun RiderLogIn(
 
     if(confirmation) {
         if (deliveryViewModel.loginRiderId.isNotEmpty()) {
-            prefEditor.putString("riderId", deliveryViewModel.loginRiderId)
+            prefEditor.putString("riderId", deliveryViewModel.loginRiderId).apply()
         }
     }
 
-//    LaunchedEffect(confirmation) {
-//        if (!confirmation) return@LaunchedEffect
-//            prefEditor.putBoolean("isLoggedIn", true).apply()
-//            loginConfirmation = sharedPref.getBoolean("isLoggedIn", false)
-//            confirmation = false
-//    }
+    LaunchedEffect(confirmation) {
+        if (!confirmation) return@LaunchedEffect
+            prefEditor.putBoolean("isLoggedIn", true).apply()
+            loginConfirmation = sharedPref.getBoolean("isLoggedIn", false)
+            confirmation = false
+    }
 
     LaunchedEffect(loginMessage) {
         when {
@@ -154,7 +156,7 @@ fun RiderLogIn(
                                 val startTime = System.currentTimeMillis()
                                 isLoading = true
                                 try {
-                                    withContext(Dispatchers.Main) {
+                                    withContext(Dispatchers.IO) {
                                         deliveryViewModel.riderLogin(
                                             riderEmail = riderMail,
                                             password = password

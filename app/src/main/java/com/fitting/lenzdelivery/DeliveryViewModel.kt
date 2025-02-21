@@ -18,7 +18,7 @@ import com.fitting.lenzdelivery.network.WebSocketManager
 import com.fitting.lenzdelivery.network.deliveryService
 import kotlinx.coroutines.launch
 
-class DeliveryViewModel() : ViewModel() {
+class DeliveryViewModel : ViewModel() {
     private val _deliveryService = deliveryService
 
     private val _groupOrders = mutableStateListOf<GroupOrderData>()
