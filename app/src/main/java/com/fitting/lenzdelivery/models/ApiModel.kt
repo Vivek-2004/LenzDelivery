@@ -16,21 +16,20 @@ data class GroupOrderResponse(
 )
 
 data class GroupOrder(
-    @SerializedName("rider_details") val riderDetails: RiderDetails,
-    val paidAmount: Int,
-    val leftAmount: Int,
     @SerializedName("tracking_status") var trackingStatus: String,
-    @SerializedName("rider_id") val riderId: String?,
-    @SerializedName("admin_id") val adminId: String?,
     @SerializedName("_id") val id: String,
     val userId: String,
-    val totalAmount: Int,
-    val deliveryCharge: Int,
-    val finalAmount: Int,
-    val paymentStatus: String,
+    val orders: List<Order>,
     val createdAt: String,
     val updatedAt: String,
-    val common_pickup_key: String
+    val common_pickup_key: String,
+    val shop_pickup_key: String,
+    val delAmount: Double,
+    val pickupAmount: Double
+)
+
+data class Order(
+    val deliveryCharge: Int
 )
 
 data class RiderDetails(

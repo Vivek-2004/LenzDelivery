@@ -35,6 +35,11 @@ import com.fitting.lenzdelivery.R
 
 @Composable
 fun PickupItem(
+    delId: String,
+    quantity: Int,
+    from: String,
+    to: String,
+    earning: Double,
     onCardClick: () -> Unit,
     onAssignClick: () -> Unit
 ) {
@@ -51,10 +56,10 @@ fun PickupItem(
                 onCardClick()
             }
                 .background(Color.White)
-                .padding(top = 16.dp, bottom = 10.dp, start = 16.dp, end = 16.dp)
+                .padding(horizontal = 21.dp, vertical = 12.dp)
         ) {
             Text(
-                text = "#16b33700-7417-46e8-8fca-08ab2239dc47",
+                text = "#$delId",
                 fontSize = 12.sp,
                 fontStyle = FontStyle.Italic,
                 color = Color.Gray
@@ -66,7 +71,7 @@ fun PickupItem(
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                             append("No. Of Deliveries: ")
                         }
-                        append("3")
+                        append(quantity.toString())
                     },
                     fontSize = 16.sp,
                     color = Color.Red.copy(alpha = 0.5f)
@@ -85,7 +90,7 @@ fun PickupItem(
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                         append("Pick From: ")
                     }
-                    append("LenZ")
+                    append(from)
                 },
                 fontSize = 16.sp,
                 color = Color(parseColor("#8338ec"))
@@ -96,7 +101,7 @@ fun PickupItem(
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                         append("Deliver To: ")
                     }
-                    append("Station Bus Stand, Durgapur")
+                    append(to)
                 },
                 fontSize = 16.sp,
                 color = Color(parseColor("#1e6091"))
@@ -107,7 +112,7 @@ fun PickupItem(
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                         append("Estimated Earning: ")
                     }
-                    append("₹43.09/-")
+                    append("₹$earning/-")
                 },
                 fontSize = 16.sp,
                 color = Color(parseColor("#008000"))
