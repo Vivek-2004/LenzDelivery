@@ -1,6 +1,5 @@
 package com.fitting.lenzdelivery.auth
 
-import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.os.Build
 import android.widget.Toast
@@ -67,20 +66,20 @@ fun RiderLogIn(
     var confirmation = (loginMessage == "Login Successful")
     var riderId by remember { mutableStateOf("") }
 
-    if(confirmation) {
-            prefEditor.putString("riderId", riderId).apply()
+    if (confirmation) {
+        prefEditor.putString("riderId", riderId).apply()
     }
 
     LaunchedEffect(confirmation) {
         if (!confirmation) return@LaunchedEffect
-            prefEditor.putBoolean("isLoggedIn", true).apply()
-            loginConfirmation = sharedPref.getBoolean("isLoggedIn", false)
-            confirmation = false
+        prefEditor.putBoolean("isLoggedIn", true).apply()
+        loginConfirmation = sharedPref.getBoolean("isLoggedIn", false)
+        confirmation = false
     }
 
     LaunchedEffect(loginMessage) {
         when {
-            (loginMessage == "Login Successful") -> { }
+            (loginMessage == "Login Successful") -> {}
             loginMessage.isNotEmpty() -> {
                 Toast.makeText(context, loginMessage, Toast.LENGTH_SHORT).show()
                 loginMessage = ""
@@ -148,7 +147,7 @@ fun RiderLogIn(
                 LoginButton(
                     isLoading = isLoading,
                     onClick = {
-                        if(riderMail.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$".toRegex())) {
+                        if (riderMail.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$".toRegex())) {
                             scope.launch {
                                 val startTime = System.currentTimeMillis()
                                 isLoading = true

@@ -38,8 +38,10 @@ interface ApiService {
     suspend fun getGroupOrders(): GroupOrderResponse
 
     @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
-    @GET("riders")
-    suspend fun getAllRiderDetails(): List<RiderDetails>
+    @PUT("riders/{riderId}")
+    suspend fun getRiderDetails(
+        @Path("riderId") riderId: String
+    ): RiderDetails
 
     @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
     @GET("riders/order-history/{riderId}")

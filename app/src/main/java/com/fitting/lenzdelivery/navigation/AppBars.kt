@@ -100,7 +100,7 @@ fun BottomNavigationBar(
     )
 
     Column(modifier = Modifier.wrapContentSize()) {
-        HorizontalDivider( thickness = 2.dp )
+        HorizontalDivider(thickness = 2.dp)
 
         NavigationBar(
             modifier = Modifier

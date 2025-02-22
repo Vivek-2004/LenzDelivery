@@ -1,5 +1,6 @@
 package com.fitting.lenzdelivery.screens.component_holders
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,10 +10,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,20 +36,39 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentsHistory(
     deliveryViewModel: DeliveryViewModel
 ) {
-    val rider = deliveryViewModel.allRiders.first()
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            deliveryViewModel.getRiderEarningHistory(
-                riderId = rider._id
-            )
+    val riderState by deliveryViewModel.riderDetails.collectAsState()
+    var updateHistory by remember { mutableStateOf(true) }
+    var isRefreshing by remember { mutableStateOf(false) }
+    LaunchedEffect(updateHistory) {
+        if (!updateHistory) return@LaunchedEffect
+        try {
+            withContext(Dispatchers.IO) {
+                riderState?.let { rider ->
+                    deliveryViewModel.getRiderEarningHistory(
+                        riderId = rider._id
+                    )
+                }
+            }
+        } finally {
+            updateHistory = false
         }
     }
-    val listState = rememberLazyListState()
     val scrollBarWidth = 5.dp
+    val listState = rememberLazyListState()
+    val pullToRefreshState = rememberPullToRefreshState()
+
+    if (isRefreshing) {
+        LaunchedEffect(Unit) {
+            updateHistory = true
+            delay(2000L)
+            isRefreshing = false
+        }
+    }
 
     if (deliveryViewModel.earningHistory.isEmpty()) {
         Column(
@@ -72,35 +96,46 @@ fun PaymentsHistory(
             }
         }
     } else {
-        LazyColumn(
-            state = listState,
-            horizontalAlignment = Alignment.CenterHorizontally,
+        PullToRefreshBox(
+            state = pullToRefreshState,
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+            },
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 50.dp)
-                .drawBehind {
-                    val elementHeight = this.size.height / listState.layoutInfo.totalItemsCount
-                    val offset =
-                        listState.layoutInfo.visibleItemsInfo.first().index * elementHeight
-                    val scrollbarHeight =
-                        listState.layoutInfo.visibleItemsInfo.size * elementHeight
-                    drawRect(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        topLeft = Offset(this.size.width - scrollBarWidth.toPx(), offset),
-                        size = Size(scrollBarWidth.toPx(), scrollbarHeight)
+                .background(Color.White.copy(alpha = 0.1f))
+        ) {
+            LazyColumn(
+                state = listState,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 50.dp)
+                    .drawBehind {
+                        val elementHeight = this.size.height / listState.layoutInfo.totalItemsCount
+                        val offset =
+                            listState.layoutInfo.visibleItemsInfo.first().index * elementHeight
+                        val scrollbarHeight =
+                            listState.layoutInfo.visibleItemsInfo.size * elementHeight
+                        drawRect(
+                            color = Color.Black.copy(alpha = 0.5f),
+                            topLeft = Offset(this.size.width - scrollBarWidth.toPx(), offset),
+                            size = Size(scrollBarWidth.toPx(), scrollbarHeight)
+                        )
+                    }
+                    .padding(end = scrollBarWidth)
+            ) {
+                itemsIndexed(deliveryViewModel.earningHistory.reversed()) { index, item ->
+                    PaymentHistoryItem(
+                        index = index,
+                        orderId = item.orderKey,
+                        paymentAmount = item.paymentAmount
+                    )
+                    HorizontalDivider(
+                        color = Color.Black
                     )
                 }
-                .padding(end = scrollBarWidth)
-        ) {
-            itemsIndexed(deliveryViewModel.earningHistory.reversed()) { index, item ->
-                PaymentHistoryItem(
-                    index = index,
-                    orderId = item.orderKey,
-                    paymentAmount = item.paymentAmount
-                )
-                HorizontalDivider(
-                    color = Color.Black
-                )
             }
         }
     }

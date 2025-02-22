@@ -29,7 +29,14 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            val isLoggedIn by remember { mutableStateOf(sharedPref.getBoolean("isLoggedIn", false)) }
+            val isLoggedIn by remember {
+                mutableStateOf(
+                    sharedPref.getBoolean(
+                        "isLoggedIn",
+                        false
+                    )
+                )
+            }
             LenZDeliveryTheme(darkTheme = false) {
                 if (isLoggedIn) {
                     MyApp(sharedPref = sharedPref)

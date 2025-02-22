@@ -44,16 +44,14 @@ import com.fitting.lenzdelivery.screens.component_holders.PaymentsHistory
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MyApp(
-    sharedPref: SharedPreferences
-) {
+fun MyApp(sharedPref: SharedPreferences) {
     val riderId: String? = sharedPref.getString("riderId", "")
 
     val deliveryViewModelInstance: DeliveryViewModel = viewModel(
-        factory = riderId?.let {id -> DeliveryViewModelFactory(id) }
+        factory = riderId?.let { id -> DeliveryViewModelFactory(id) }
     )
 
-    if(deliveryViewModelInstance.allRiders.isEmpty()) {
+    if (deliveryViewModelInstance.allGroupOrders.isEmpty()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()

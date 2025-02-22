@@ -11,37 +11,33 @@ import com.fitting.lenzdelivery.models.EarningHistory
 import com.fitting.lenzdelivery.models.EditPhoneNumber
 import com.fitting.lenzdelivery.models.GroupOrder
 import com.fitting.lenzdelivery.models.GroupOrderData
-import com.fitting.lenzdelivery.models.LogInRider
 import com.fitting.lenzdelivery.models.RiderDetails
 import com.fitting.lenzdelivery.network.WebSocketManager
 import com.fitting.lenzdelivery.network.deliveryService
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class DeliveryViewModel(
-    riderId: String
-) : ViewModel() {
+class DeliveryViewModel(riderId: String) : ViewModel() {
+
     private val _deliveryService = deliveryService
-
-    private val _groupOrders = mutableStateListOf<GroupOrderData>()
-    val groupOrders: List<GroupOrderData> get() = _groupOrders
-
+    val currentRiderId = riderId
+    private val _riderDetails = MutableStateFlow<RiderDetails?>(null)
+    val riderDetails: StateFlow<RiderDetails?> = _riderDetails.asStateFlow()
     var allGroupOrders by mutableStateOf<List<GroupOrder>>(emptyList())
-        private set
-
-    var allRiders by mutableStateOf<List<RiderDetails>>(emptyList())
         private set
 
     var earningHistory by mutableStateOf<List<EarningHistory>>(emptyList())
         private set
 
-    var riderLogInMessage by mutableStateOf("")
-    var loginRiderId by mutableStateOf("")
+    private val _groupOrders = mutableStateListOf<GroupOrderData>()
+    val groupOrders: List<GroupOrderData> get() = _groupOrders
 
     init {
+        getRiderDetails()
         getGroupOrders()
 //        connectSocket()
-        getRiderDetails()
-        println(riderId + "  While Init")
     }
 
     fun getGroupOrders() {
@@ -58,30 +54,11 @@ class DeliveryViewModel(
     fun getRiderDetails() {
         viewModelScope.launch {
             try {
-                val ridersResponse = _deliveryService.getAllRiderDetails()
-                allRiders = ridersResponse
-            } catch (e: Exception) {
-                allRiders = emptyList()
-            }
-        }
-    }
-
-    fun riderLogin(
-        riderEmail: String,
-        password: String
-    ) {
-        viewModelScope.launch {
-            try {
-                val riderLogInResponse = _deliveryService.logInRider(
-                    loginBody = LogInRider(
-                        riderEmail = riderEmail,
-                        password = password
-                    )
+                val ridersResponse = _deliveryService.getRiderDetails(
+                    riderId = currentRiderId
                 )
-                riderLogInMessage = riderLogInResponse.message
-                loginRiderId = riderLogInResponse.riderId
-            } catch (e: Exception) {
-                riderLogInMessage = "Invalid ID or Password"
+                _riderDetails.value = ridersResponse
+            } catch (_: Exception) {
             }
         }
     }
@@ -125,12 +102,10 @@ class DeliveryViewModel(
                         newStatus = newStatus
                     )
                 )
-            } catch(_: Exception) {
+            } catch (_: Exception) {
             }
         }
     }
-
-
 
 
     private fun connectSocket() {
