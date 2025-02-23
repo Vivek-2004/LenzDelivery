@@ -37,7 +37,7 @@ import androidx.navigation.compose.composable
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.DeliveryViewModelFactory
 import com.fitting.lenzdelivery.screens.EarningsScreen
-import com.fitting.lenzdelivery.screens.PickupDetails
+import com.fitting.lenzdelivery.screens.component_holders.PickupDetails
 import com.fitting.lenzdelivery.screens.PickupScreen
 import com.fitting.lenzdelivery.screens.ProfileScreen
 import com.fitting.lenzdelivery.screens.component_holders.PaymentsHistory

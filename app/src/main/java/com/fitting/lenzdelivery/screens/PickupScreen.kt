@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -39,27 +38,28 @@ fun PickupScreen(
 ) {
     val listState = rememberLazyListState()
     val scrollBarWidth = 5.dp
-    val scrollState = rememberScrollState()
     val pullToRefreshState = rememberPullToRefreshState()
     var isRefreshing by remember { mutableStateOf(false) }
 
     val riderState by deliveryViewModel.riderDetails.collectAsState()
 
     val eligibleOrders = deliveryViewModel.allGroupOrders.filter {
-        (it.trackingStatus == "Internal Tracking") || it.trackingStatus == "Order Placed For Pickup"
+        it.trackingStatus == "Order Placed For Pickup" || it.trackingStatus == "Internal Tracking"
     }
-    println(eligibleOrders)
-    val orderMap = mutableMapOf<String, Int>()
 
-    eligibleOrders.forEach { order ->
-        val pickupKey = order.common_pickup_key ?: return@forEach
-        if(!orderMap.containsKey(pickupKey)) {
-            orderMap[pickupKey] = 1
-        } else {
-            orderMap[pickupKey] = (orderMap.getValue(pickupKey) + 1)
+    // Create order map with pickup keys
+    val orderMap = mutableMapOf<String, Int>().apply {
+        eligibleOrders.forEach { order ->
+            val pickupKey = when (order.trackingStatus) {
+                "Order Placed For Pickup" -> order.shop_pickup_key
+                "Internal Tracking" -> order.common_pickup_key
+                else -> null
+            }
+            pickupKey?.let { key ->
+                this[key] = this.getOrDefault(key, 0) + 1
+            }
         }
     }
-    println(orderMap)
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
@@ -80,12 +80,11 @@ fun PickupScreen(
                             isRefreshing = false
                         }
                     }
+
                     PullToRefreshBox(
                         state = pullToRefreshState,
                         isRefreshing = isRefreshing,
-                        onRefresh = {
-                            isRefreshing = true
-                        },
+                        onRefresh = { isRefreshing = true },
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color.White.copy(alpha = 0.09f))
@@ -96,29 +95,34 @@ fun PickupScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .drawBehind {
-                                    val elementHeight = this.size.height / listState.layoutInfo.totalItemsCount
-                                    val offset =
-                                        listState.layoutInfo.visibleItemsInfo.first().index * elementHeight
-                                    val scrollbarHeight =
-                                        listState.layoutInfo.visibleItemsInfo.size * elementHeight
+                                    val elementHeight = size.height / listState.layoutInfo.totalItemsCount
+                                    val offset = listState.firstVisibleItemIndex * elementHeight
+                                    val scrollbarHeight = listState.layoutInfo.visibleItemsInfo.size * elementHeight
                                     drawRect(
                                         color = Color.Black.copy(alpha = 0.5f),
-                                        topLeft = Offset(this.size.width - scrollBarWidth.toPx(), offset),
+                                        topLeft = Offset(size.width - scrollBarWidth.toPx(), offset),
                                         size = Size(scrollBarWidth.toPx(), scrollbarHeight)
                                     )
                                 }
                                 .padding(end = scrollBarWidth)
                         ) {
-                            val listOfPairs = orderMap.toList()
-                            itemsIndexed(listOfPairs) { index, (key, value) ->
+                            itemsIndexed(orderMap.toList()) { index, (key, value) ->
+                                // Find the relevant order using proper key matching
+                                val relevantOrder = eligibleOrders.first { order ->
+                                    (order.trackingStatus == "Order Placed For Pickup" && order.shop_pickup_key == key) ||
+                                            (order.trackingStatus == "Internal Tracking" && order.common_pickup_key == key)
+                                }
+//                                val shopAddress =
+
                                 PickupItem(
                                     delId = key,
                                     quantity = value,
-                                    from = "LenZ",
+                                    from = if(relevantOrder.trackingStatus == "Order Placed For Pickup") ""
+                                            else "LenZ",
                                     to = "Shop",
-                                    earning = eligibleOrders.filter { it.common_pickup_key == key }.first().delAmount,
-                                    onCardClick = {},
-                                    onAssignClick = {}
+                                    earning = relevantOrder.delAmount,
+                                    onCardClick = { /* Handle click */ },
+                                    onAssignClick = { /* Handle assign */ }
                                 )
                             }
                         }

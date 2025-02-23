@@ -4,7 +4,6 @@ import android.graphics.Color.parseColor
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,11 +15,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -32,6 +34,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fitting.lenzdelivery.R
+import com.fitting.lenzdelivery.screens.component_holders.SwipeButton
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun PickupItem(
@@ -46,10 +51,10 @@ fun PickupItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp),
+            .padding(4.dp),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(14.dp),
-        border = BorderStroke(3.dp, Color.Blue.copy(alpha = 0.4f))
+        border = BorderStroke(3.dp, Color.Black)
     ) {
         Column(
             modifier = Modifier.clickable {
@@ -117,25 +122,46 @@ fun PickupItem(
                 fontSize = 16.sp,
                 color = Color(parseColor("#008000"))
             )
-        }
-        HorizontalDivider(color = Color.Black)
-        Row(
-            modifier = Modifier.fillMaxWidth()
-                .height(40.dp)
-                .clickable {
-                    onAssignClick()
-                }
-                .background(Color.LightGray),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                modifier = Modifier.padding(4.dp),
+
+            val coroutineScope = rememberCoroutineScope()
+            var isComplete by remember { mutableStateOf(false) }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            SwipeButton(
                 text = "Assign Self",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = Color(parseColor("#A020F0"))
+                isComplete = isComplete,
+                onSwipe = {
+                    onAssignClick()
+                    coroutineScope.launch {
+                        delay(2000)
+                        isComplete = true
+                    }
+                }
             )
         }
+
+
+//        Row(
+//            modifier = Modifier.fillMaxWidth()
+//                .height(60.dp)
+//                .background(Color.White)
+//                .padding(horizontal = 4.dp),
+//            horizontalArrangement = Arrangement.Center,
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            val coroutineScope = rememberCoroutineScope()
+//            var isComplete by remember { mutableStateOf(false) }
+//            SwipeButton(
+//                text = "Assign Self",
+//                isComplete = isComplete,
+//                onSwipe = {
+//                    onAssignClick()
+//                    coroutineScope.launch {
+//                        delay(2000)
+//                        isComplete = true
+//                    }
+//                }
+//            )
+//        }
     }
 }

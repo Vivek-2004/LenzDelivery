@@ -1,4 +1,4 @@
-package com.fitting.lenzdelivery.screens
+package com.fitting.lenzdelivery.screens.component_holders
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text

@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.fitting.lenzdelivery"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation ("androidx.compose.material:material-icons-extended:1.7.8")
 
     implementation("io.socket:socket.io-client:2.1.0") {
         exclude(group = "org.json", module = "json")
@@ -61,6 +62,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.compose.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
