@@ -51,7 +51,7 @@ fun MyApp(sharedPref: SharedPreferences) {
         factory = riderId?.let { id -> DeliveryViewModelFactory(id) }
     )
 
-    if (deliveryViewModelInstance.allGroupOrders.isEmpty()) {
+    if (deliveryViewModelInstance.riderOrders.isEmpty()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -134,9 +134,10 @@ fun MyApp(sharedPref: SharedPreferences) {
                         deliveryViewModel = deliveryViewModelInstance
                     )
                 }
-                composable(route = NavigationDestination.PickupDetails.name) {
+                composable(route = NavigationDestination.PickupDetails.name + "/{orderKey}") { backStackEntry ->
                     PickupDetails(
-                        deliveryViewModel = deliveryViewModelInstance
+                        deliveryViewModel = deliveryViewModelInstance,
+                        orderKey = backStackEntry.arguments?.getString("orderKey") ?: "",
                     )
                 }
             }

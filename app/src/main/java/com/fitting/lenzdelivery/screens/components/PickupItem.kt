@@ -42,11 +42,12 @@ import kotlinx.coroutines.launch
 fun PickupItem(
     delId: String,
     quantity: Int,
-    from: String,
-    to: String,
+    orderType: String,
     earning: Double,
     onCardClick: () -> Unit,
-    onAssignClick: () -> Unit
+    onAssignSwipe: () -> Unit
+//    from: String,
+//    to: String,
 ) {
     Card(
         modifier = Modifier
@@ -90,26 +91,16 @@ fun PickupItem(
                 )
             }
             Spacer(modifier = Modifier.height(3.dp))
+
             Text(
                 text = buildAnnotatedString {
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Pick From: ")
+                        append("Order Type: ")
                     }
-                    append(from)
+                    append(orderType)
                 },
                 fontSize = 16.sp,
                 color = Color(parseColor("#8338ec"))
-            )
-            Spacer(modifier = Modifier.height(3.dp))
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Deliver To: ")
-                    }
-                    append(to)
-                },
-                fontSize = 16.sp,
-                color = Color(parseColor("#1e6091"))
             )
             Spacer(modifier = Modifier.height(3.dp))
             Text(
@@ -131,7 +122,7 @@ fun PickupItem(
                 text = "Assign Self",
                 isComplete = isComplete,
                 onSwipe = {
-                    onAssignClick()
+                    onAssignSwipe()
                     coroutineScope.launch {
                         delay(2000)
                         isComplete = true
@@ -139,29 +130,5 @@ fun PickupItem(
                 }
             )
         }
-
-
-//        Row(
-//            modifier = Modifier.fillMaxWidth()
-//                .height(60.dp)
-//                .background(Color.White)
-//                .padding(horizontal = 4.dp),
-//            horizontalArrangement = Arrangement.Center,
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            val coroutineScope = rememberCoroutineScope()
-//            var isComplete by remember { mutableStateOf(false) }
-//            SwipeButton(
-//                text = "Assign Self",
-//                isComplete = isComplete,
-//                onSwipe = {
-//                    onAssignClick()
-//                    coroutineScope.launch {
-//                        delay(2000)
-//                        isComplete = true
-//                    }
-//                }
-//            )
-//        }
     }
 }

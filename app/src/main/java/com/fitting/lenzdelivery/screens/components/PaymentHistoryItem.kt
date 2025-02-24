@@ -26,7 +26,9 @@ import androidx.compose.ui.unit.sp
 fun PaymentHistoryItem(
     index: Int,
     orderId: String,
-    paymentAmount: Double
+    paymentAmount: Double,
+    date: String,
+    time: String
 ) {
     val indexColor = if(index % 2 == 0) Color.LightGray.copy(alpha = 0.8f)
                     else Color.White
@@ -54,9 +56,9 @@ fun PaymentHistoryItem(
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             Text(
-                text = "02:34 p.m.",
-                fontWeight = FontWeight.Bold,
-                color = Color.DarkGray
+                text = "$date [$time]",
+                color = Color.DarkGray,
+                fontSize = 13.sp
             )
             Text(
                 text = "+ ₹${paymentAmount}/-",

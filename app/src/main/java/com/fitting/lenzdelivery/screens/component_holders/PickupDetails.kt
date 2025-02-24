@@ -6,12 +6,12 @@ import androidx.compose.runtime.Composable
 import com.fitting.lenzdelivery.DeliveryViewModel
 
 @Composable
-fun PickupDetails(deliveryViewModel: DeliveryViewModel) {
+fun PickupDetails(
+    orderKey: String,
+    deliveryViewModel: DeliveryViewModel
+) {
+    val order = deliveryViewModel.riderOrders.first { it.orderKey == orderKey }
     Column {
-        Column {
-            Text(text = deliveryViewModel.allGroupOrders.filter {
-                (it.trackingStatus == "Internal Tracking") || it.trackingStatus == "Order Placed For Pickup"
-            }.toString())
-        }
+        Text(order.toString())
     }
 }

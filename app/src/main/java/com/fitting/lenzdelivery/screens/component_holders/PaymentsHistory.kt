@@ -1,5 +1,7 @@
 package com.fitting.lenzdelivery.screens.component_holders
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,11 +33,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.fitting.lenzdelivery.DeliveryViewModel
+import com.fitting.lenzdelivery.formDate
 import com.fitting.lenzdelivery.screens.components.PaymentHistoryItem
+import com.fitting.lenzdelivery.toIST
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentsHistory(
@@ -49,9 +54,7 @@ fun PaymentsHistory(
         try {
             withContext(Dispatchers.IO) {
                 riderState?.let { rider ->
-                    deliveryViewModel.getRiderEarningHistory(
-                        riderId = rider._id
-                    )
+                    deliveryViewModel.getRiderOrders()
                 }
             }
         } finally {
@@ -70,7 +73,7 @@ fun PaymentsHistory(
         }
     }
 
-    if (deliveryViewModel.earningHistory.isEmpty()) {
+    if (deliveryViewModel.riderOrders.isEmpty()) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -126,15 +129,19 @@ fun PaymentsHistory(
                     }
                     .padding(end = scrollBarWidth)
             ) {
-                itemsIndexed(deliveryViewModel.earningHistory.reversed()) { index, item ->
-                    PaymentHistoryItem(
-                        index = index,
-                        orderId = item.orderKey,
-                        paymentAmount = item.paymentAmount
-                    )
-                    HorizontalDivider(
-                        color = Color.Black
-                    )
+                itemsIndexed(deliveryViewModel.riderOrders.reversed()) { index, item ->
+                    if (item.riderId == deliveryViewModel.riderObjectId && item.isCompleted) {
+                        PaymentHistoryItem(
+                            index = index,
+                            orderId = item.orderKey,
+                            paymentAmount = item.paymentAmount,
+                            date = item.createdAt.formDate(),
+                            time = item.createdAt.toIST()
+                        )
+                        HorizontalDivider(
+                            color = Color.Black
+                        )
+                    }
                 }
             }
         }

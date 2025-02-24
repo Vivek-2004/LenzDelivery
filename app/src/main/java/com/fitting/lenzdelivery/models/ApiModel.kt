@@ -11,25 +11,12 @@ data class GroupOrderData(
 )
 //
 
-data class GroupOrderResponse(
-    val data: List<GroupOrder>
-)
-
 data class GroupOrder(
-    @SerializedName("tracking_status") var trackingStatus: String,
     @SerializedName("_id") val id: String,
-    val userId: String,
-    val orders: List<Order>,
-    val createdAt: String,
-    val updatedAt: String,
-    val common_pickup_key: String,
-    val shop_pickup_key: String,
-    val delAmount: Double,
-    val pickupAmount: Double
-)
-
-data class Order(
-    val test: Int
+    @SerializedName("tracking_status") var trackingStatus: String,
+    val userId: String
+//    val common_pickup_key: String,
+//    val shop_pickup_key: String
 )
 
 data class RiderDetails(
@@ -48,12 +35,32 @@ data class RiderDetails(
     val createdAt: String
 )
 
-data class EarningHistory(
+data class OrderAddress(
+    val line1: String,
+    val line2: String,
+    val landmark: String,
+    val city: String,
+    val state: String,
+    val pinCode: String
+)
+
+data class GroupedOrders(
+    val userId: String,
+    val shopName: String,
+    val address: OrderAddress,
+    val orders: List<String>
+)
+
+data class RiderOrder(
     @SerializedName("rider_id") val riderId: String,
     @SerializedName("delivery_type") val deliveryType: String,
     @SerializedName("order_key") val orderKey: String,
+    val isCompleted: Boolean,
     val paymentAmount: Double,
-    val createdAt: String
+    val createdAt: String,
+    @SerializedName("shop_address") val shopAddress: OrderAddress,
+    @SerializedName("group_order_ids") val groupOrderIds: List<String>,
+    @SerializedName("grouped_orders") val groupedOrders: List<GroupedOrders>
 )
 
 data class EditPhoneNumber(

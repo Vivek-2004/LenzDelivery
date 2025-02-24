@@ -41,7 +41,7 @@ fun TopAppBar(
 ) {
     val title = when (currentScreenName) {
         "PaymentsHistory" -> "History"
-        "PickupDetails" -> "Details"
+        "PickupDetails/{orderKey}" -> "Details"
         else -> currentScreenName
     }
 
