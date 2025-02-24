@@ -160,7 +160,7 @@ fun ProfileScreen(deliveryViewModel: DeliveryViewModel) {
                                 Color(parseColor("#38b000")).copy(alpha = 0.4f)
                             )
                         ) {
-                            Column(
+                            Column( 
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(Color.LightGray)

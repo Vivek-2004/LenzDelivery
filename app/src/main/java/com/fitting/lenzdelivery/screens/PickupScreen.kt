@@ -108,19 +108,22 @@ fun PickupScreen(
                         ) {
                             itemsIndexed(orderMap.toList()) { index, (key, value) ->
                                 // Find the relevant order using proper key matching
-                                val relevantOrder = eligibleOrders.first { order ->
+                                val relevantOrders = eligibleOrders.filter { order ->
                                     (order.trackingStatus == "Order Placed For Pickup" && order.shop_pickup_key == key) ||
                                             (order.trackingStatus == "Internal Tracking" && order.common_pickup_key == key)
                                 }
+                                println(relevantOrders)
 //                                val shopAddress =
 
                                 PickupItem(
                                     delId = key,
                                     quantity = value,
-                                    from = if(relevantOrder.trackingStatus == "Order Placed For Pickup") ""
-                                            else "LenZ",
+                                    from = "Shop",
+//                                    from = if(relevantOrder.trackingStatus == "Order Placed For Pickup") ""
+//                                            else "LenZ",
                                     to = "Shop",
-                                    earning = relevantOrder.delAmount,
+                                    earning = if(relevantOrders.first().delAmount > 0.0) relevantOrders.first().delAmount
+                                                else relevantOrders.first().pickupAmount,
                                     onCardClick = { /* Handle click */ },
                                     onAssignClick = { /* Handle assign */ }
                                 )

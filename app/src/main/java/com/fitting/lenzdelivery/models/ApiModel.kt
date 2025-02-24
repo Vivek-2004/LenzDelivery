@@ -29,7 +29,7 @@ data class GroupOrder(
 )
 
 data class Order(
-    val deliveryCharge: Int
+    val test: Int
 )
 
 data class RiderDetails(
