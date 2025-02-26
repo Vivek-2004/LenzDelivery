@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,11 +19,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -34,9 +30,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fitting.lenzdelivery.R
-import com.fitting.lenzdelivery.screens.component_holders.SwipeButton
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.fitting.lenzdelivery.screens.component_holders.SwipeToButton
 
 @Composable
 fun PickupItem(
@@ -44,24 +38,23 @@ fun PickupItem(
     quantity: Int,
     orderType: String,
     earning: Double,
+    bgColor: Color,
     onCardClick: () -> Unit,
     onAssignSwipe: () -> Unit
-//    from: String,
-//    to: String,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp),
+            .padding(horizontal = 10.dp, vertical = 6.dp),
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(14.dp),
         border = BorderStroke(3.dp, Color.Black)
     ) {
         Column(
-            modifier = Modifier.clickable {
-                onCardClick()
-            }
-                .background(Color.White)
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable { onCardClick() }
+                .background(bgColor)
                 .padding(horizontal = 21.dp, vertical = 12.dp)
         ) {
             Text(
@@ -114,19 +107,11 @@ fun PickupItem(
                 color = Color(parseColor("#008000"))
             )
 
-            val coroutineScope = rememberCoroutineScope()
-            var isComplete by remember { mutableStateOf(false) }
-
             Spacer(modifier = Modifier.height(12.dp))
-            SwipeButton(
-                text = "Assign Self",
-                isComplete = isComplete,
-                onSwipe = {
+
+            SwipeToButton(
+                onSwipeComplete = {
                     onAssignSwipe()
-                    coroutineScope.launch {
-                        delay(2000)
-                        isComplete = true
-                    }
                 }
             )
         }

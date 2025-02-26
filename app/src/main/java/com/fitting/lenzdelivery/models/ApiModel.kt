@@ -35,7 +35,7 @@ data class RiderDetails(
     val createdAt: String
 )
 
-data class OrderAddress(
+data class ShopAddress(
     val line1: String,
     val line2: String,
     val landmark: String,
@@ -45,10 +45,19 @@ data class OrderAddress(
 )
 
 data class GroupedOrders(
-    val userId: String,
     val shopName: String,
-    val address: OrderAddress,
-    val orders: List<String>
+    val dealerName: String,
+    val phone: String,
+    val alternatePhone: String,
+    val address: ShopAddress
+)
+
+data class ShopDetails(
+    val shopName: String,
+    val dealerName: String,
+    val phone: String,
+    val alternatePhone: String,
+    val address: ShopAddress
 )
 
 data class RiderOrder(
@@ -58,7 +67,7 @@ data class RiderOrder(
     val isCompleted: Boolean,
     val paymentAmount: Double,
     val createdAt: String,
-    @SerializedName("shop_address") val shopAddress: OrderAddress,
+    @SerializedName("shop_details") val shopDetails: ShopDetails,
     @SerializedName("group_order_ids") val groupOrderIds: List<String>,
     @SerializedName("grouped_orders") val groupedOrders: List<GroupedOrders>
 )

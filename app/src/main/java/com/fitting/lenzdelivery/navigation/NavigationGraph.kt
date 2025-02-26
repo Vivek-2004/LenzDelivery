@@ -118,6 +118,7 @@ fun MyApp(sharedPref: SharedPreferences) {
                         navController = navController
                     )
                 }
+
                 composable(route = NavigationDestination.Earnings.name) {
                     EarningsScreen(
                         deliveryViewModel = deliveryViewModelInstance,

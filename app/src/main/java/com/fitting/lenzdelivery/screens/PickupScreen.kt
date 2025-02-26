@@ -1,12 +1,16 @@
 package com.fitting.lenzdelivery.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -22,16 +26,19 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.navigation.NavigationDestination
+import com.fitting.lenzdelivery.screens.component_holders.Details.TransitOrderDetails
 import com.fitting.lenzdelivery.screens.components.PickupItem
 import kotlinx.coroutines.delay
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PickupScreen(
-    deliveryViewModel: DeliveryViewModel,
+    deliveryViewModel: DeliveryViewModel = viewModel(),
     navController: NavController,
 ) {
     val listState = rememberLazyListState()
@@ -39,10 +46,15 @@ fun PickupScreen(
     val pullToRefreshState = rememberPullToRefreshState()
     var isRefreshing by remember { mutableStateOf(false) }
 
-    val eligibleOrders = deliveryViewModel.riderOrders.filter {
+    val allUnassignedOrders = deliveryViewModel.riderOrders.filter {
         it.riderId == null
     }
-    println(eligibleOrders)
+    val riderOrders = deliveryViewModel.riderOrders.filter {
+        it.riderId == deliveryViewModel.riderObjectId
+    }
+
+    val incompleteOrder = riderOrders.firstOrNull { it.riderId == deliveryViewModel.riderObjectId && !it.isCompleted }
+    println(incompleteOrder.toString() + "gosh")
 
     LaunchedEffect(isRefreshing) {
         if (!isRefreshing) return@LaunchedEffect
@@ -62,38 +74,47 @@ fun PickupScreen(
             .fillMaxSize()
             .background(Color.White.copy(alpha = 0.09f))
     ) {
-        LazyColumn(
-            state = listState,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
-                .drawBehind {
-                    val elementHeight = size.height / listState.layoutInfo.totalItemsCount
-                    val offset = listState.firstVisibleItemIndex * elementHeight
-                    val scrollbarHeight = listState.layoutInfo.visibleItemsInfo.size * elementHeight
-                    drawRect(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        topLeft = Offset(size.width - scrollBarWidth.toPx(), offset),
-                        size = Size(scrollBarWidth.toPx(), scrollbarHeight)
+        if (incompleteOrder == null) {
+            LazyColumn(
+                state = listState,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .drawBehind {
+                        val elementHeight = size.height / listState.layoutInfo.totalItemsCount
+                        val offset = listState.firstVisibleItemIndex * elementHeight
+                        val scrollbarHeight =
+                            listState.layoutInfo.visibleItemsInfo.size * elementHeight
+                        drawRect(
+                            color = Color.Black.copy(alpha = 0.5f),
+                            topLeft = Offset(size.width - scrollBarWidth.toPx(), offset),
+                            size = Size(scrollBarWidth.toPx(), scrollbarHeight)
+                        )
+                    }
+                    .padding(end = scrollBarWidth)
+            ) {
+                itemsIndexed(allUnassignedOrders.reversed()) { index, item ->
+                    PickupItem(
+                        delId = item.orderKey,
+                        quantity = item.groupOrderIds.size,
+                        orderType = when (item.deliveryType) {
+                            "pickup" -> "Shop Pickup"
+                            else -> "LenZ Pickup"
+                        },
+                        earning = item.paymentAmount,
+                        bgColor = Color.White,
+                        onCardClick = {
+                            navController.navigate(NavigationDestination.PickupDetails.name + "/${item.orderKey}")
+                        },
+                        onAssignSwipe = {
+                            isRefreshing = true
+                        }
                     )
                 }
-                .padding(end = scrollBarWidth)
-        ) {
-            itemsIndexed(eligibleOrders.reversed()) { index, item ->
-                PickupItem(
-                    delId = item.orderKey,
-                    quantity = item.groupOrderIds.size,
-                    orderType = when (item.deliveryType) {
-                        "pickup" -> "Shop Pickup"
-                        else -> "LenZ Pickup"
-                    },
-                    earning = item.paymentAmount,
-                    onCardClick = {
-                        navController.navigate(NavigationDestination.PickupDetails.name + "/${item.orderKey}")
-                    },
-                    onAssignSwipe = {}
-                )
             }
+        } else {
+//            Text(incompleteOrder.toString())
+            TransitOrderDetails(order = incompleteOrder)
         }
     }
 }
