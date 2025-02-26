@@ -45,18 +45,25 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.models.RiderOrder
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TransitOrderDetails(order: RiderOrder) {
+fun TransitOrderDetails(
+    order: RiderOrder,
+    deliveryViewModel: DeliveryViewModel
+) {
+    val context = LocalContext.current
     val dateFormatter = DateTimeFormatter
         .ofPattern("MMM dd, yyyy • hh:mm a")
         .withZone(ZoneId.systemDefault())
@@ -197,59 +204,108 @@ fun TransitOrderDetails(order: RiderOrder) {
             }
         }
 
-        // Group Order Information
-        order.groupOrderIds.forEach {
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Section(
-                title = "Group Order (${order.groupOrderIds.size})",
-                icon = Icons.Default.People
+        Section(
+            title = "Group Order (${order.groupOrderIds.size})",
+            icon = Icons.Default.People
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(12.dp)
+                Column(
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        order.groupOrderIds.forEachIndexed { index, groupId ->
-                            Surface(
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.fillMaxWidth()
+                    order.groupOrderIds.forEachIndexed { index, groupId ->
+                        Surface(
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(8.dp)
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(8.dp)
-                                ) {
-                                    Text(
-                                        text = "${index + 1}.",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(end = 8.dp)
-                                    )
+                                Text(
+                                    text = "${index + 1}.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
 
-                                    Text(
-                                        text = groupId,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
+                                Text(
+                                    text = groupId.takeLast(5).toUpperCase(Locale.ROOT),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.SansSerif
+                                )
 
-                            if (index < order.groupOrderIds.size - 1) {
-                                Spacer(modifier = Modifier.height(8.dp))
+
                             }
+                        }
+
+                        if (index < order.groupOrderIds.size - 1) {
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
                 }
             }
         }
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .height(64.dp)
+                    .padding(top = 12.dp),
+                onClick = {
+                    val intent = Intent(Intent.ACTION_DIAL).apply {
+                        data = Uri.parse("tel:+918967310388")
+                    }
+                    context.startActivity(intent)
+                },
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black.copy(alpha = 0.9f),
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Contact Help")
+            }
+
+            Spacer(modifier = Modifier.width(5.dp))
+
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .height(64.dp)
+                    .padding(top = 12.dp),
+                onClick = {
+                    deliveryViewModel.getRiderOrders()
+                },
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black.copy(alpha = 0.9f),
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = "Complete Transit"
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(5.dp))
     }
 }
 
@@ -339,7 +395,7 @@ fun ShopAddressCard(order: RiderOrder) {
     ) {
         Column(
             modifier = Modifier
-                .fillMaxHeight()
+                .fillMaxSize()
                 .padding(horizontal = 12.dp, vertical = 16.dp)
         ) {
             with(order.shopDetails) {
@@ -379,8 +435,9 @@ fun ShopAddressCard(order: RiderOrder) {
                 )
                 Button(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .width(150.dp)
                         .height(64.dp)
+                        .align(Alignment.CenterHorizontally)
                         .padding(top = 12.dp),
                     onClick = {
                         val intent = Intent(Intent.ACTION_DIAL).apply {
@@ -397,15 +454,16 @@ fun ShopAddressCard(order: RiderOrder) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Call,
                             contentDescription = "Call Shop",
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Call $shopName")
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text("Shop")
+                        Spacer(modifier = Modifier.width(20.dp))
                     }
                 }
             }
@@ -424,7 +482,7 @@ fun AdminAddressCard() {
     ) {
         Column(
             modifier = Modifier
-                .fillMaxHeight()
+                .fillMaxSize()
                 .padding(16.dp)
         ) {
             Text(
@@ -457,8 +515,9 @@ fun AdminAddressCard() {
             )
             Button(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .width(150.dp)
                     .height(64.dp)
+                    .align(Alignment.CenterHorizontally)
                     .padding(top = 12.dp),
                 onClick = {
                     val intent = Intent(Intent.ACTION_DIAL).apply {
@@ -475,7 +534,7 @@ fun AdminAddressCard() {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Call,
@@ -483,7 +542,8 @@ fun AdminAddressCard() {
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Call Lenz")
+                    Text("Lenz")
+                    Spacer(modifier = Modifier.width(20.dp))
                 }
             }
         }

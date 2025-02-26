@@ -113,8 +113,10 @@ fun PickupScreen(
                 }
             }
         } else {
-//            Text(incompleteOrder.toString())
-            TransitOrderDetails(order = incompleteOrder)
+            TransitOrderDetails(
+                order = incompleteOrder,
+                deliveryViewModel = deliveryViewModel
+            )
         }
     }
 }
