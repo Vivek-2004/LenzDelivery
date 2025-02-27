@@ -46,8 +46,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.appcompat)
-    implementation("com.squareup.okhttp3:okhttp:4.9.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation(libs.okhttp)
+    implementation(libs.kotlinx.coroutines.core)
     implementation ("androidx.compose.material:material-icons-extended:1.7.8")
 
     implementation("io.socket:socket.io-client:2.1.0") {

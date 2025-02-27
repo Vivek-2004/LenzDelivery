@@ -138,7 +138,6 @@ fun TransitOrderDetails(
             }
         }
 
-        // Order Info Cards
         Spacer(modifier = Modifier.height(16.dp))
 
         Box(
@@ -247,14 +246,12 @@ fun TransitOrderDetails(
                             }
                         }
 
-                        if (index < order.groupOrderIds.size - 1) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(5.dp))
 
         Row(
             modifier = Modifier
@@ -398,72 +395,74 @@ fun ShopAddressCard(order: RiderOrder) {
                 .fillMaxSize()
                 .padding(horizontal = 12.dp, vertical = 16.dp)
         ) {
-            with(order.shopDetails) {
-                Text(
-                    text = "Shop: $shopName",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Text(
-                    text = "Dealer: $dealerName",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "${address.line1}, ${address.line2}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = address.landmark,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "${address.city} - ${address.pinCode}",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Button(
-                    modifier = Modifier
-                        .width(150.dp)
-                        .height(64.dp)
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 12.dp),
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_DIAL).apply {
-                            data = Uri.parse("tel:${phone}")
-                        }
-                        context.startActivity(intent)
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black.copy(alpha = 0.9f),
-                        contentColor = Color.White
+            order.shopDetails?.let {
+                with(order.shopDetails) {
+                    Text(
+                        text = "Shop: $shopName",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
                     )
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Call,
-                            contentDescription = "Call Shop",
-                            tint = MaterialTheme.colorScheme.onPrimary
+
+                    Text(
+                        text = "Dealer: $dealerName",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "${address.line1}, ${address.line2}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = address.landmark,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "${address.city} - ${address.pinCode}",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Button(
+                        modifier = Modifier
+                            .width(150.dp)
+                            .height(64.dp)
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 12.dp),
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_DIAL).apply {
+                                data = Uri.parse("tel:${phone}")
+                            }
+                            context.startActivity(intent)
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Black.copy(alpha = 0.9f),
+                            contentColor = Color.White
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text("Shop")
-                        Spacer(modifier = Modifier.width(20.dp))
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Call,
+                                contentDescription = "Call Shop",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text("Shop")
+                            Spacer(modifier = Modifier.width(20.dp))
+                        }
                     }
                 }
             }

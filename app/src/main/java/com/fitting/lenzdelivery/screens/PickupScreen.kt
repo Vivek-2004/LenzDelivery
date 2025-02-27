@@ -45,6 +45,7 @@ fun PickupScreen(
     val scrollBarWidth = 5.dp
     val pullToRefreshState = rememberPullToRefreshState()
     var isRefreshing by remember { mutableStateOf(false) }
+    var isAssigned by remember { mutableStateOf(false) }
 
     val allUnassignedOrders = deliveryViewModel.riderOrders.filter {
         it.riderId == null
@@ -53,7 +54,8 @@ fun PickupScreen(
         it.riderId == deliveryViewModel.riderObjectId
     }
 
-    val incompleteOrder = riderOrders.firstOrNull { it.riderId == deliveryViewModel.riderObjectId && !it.isCompleted }
+    val incompleteOrder =
+        riderOrders.firstOrNull { it.riderId == deliveryViewModel.riderObjectId && !it.isCompleted }
     println(incompleteOrder.toString() + "gosh")
 
     LaunchedEffect(isRefreshing) {
@@ -66,6 +68,16 @@ fun PickupScreen(
         }
     }
 
+    LaunchedEffect(isAssigned) {
+        if (!isAssigned) return@LaunchedEffect
+        try {
+            delay(1500L)
+            isRefreshing = true
+        } finally {
+            isAssigned = false
+        }
+    }
+
     PullToRefreshBox(
         state = pullToRefreshState,
         isRefreshing = isRefreshing,
@@ -75,44 +87,55 @@ fun PickupScreen(
             .background(Color.White.copy(alpha = 0.09f))
     ) {
         if (incompleteOrder == null) {
-            LazyColumn(
-                state = listState,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .drawBehind {
-                        val elementHeight = size.height / listState.layoutInfo.totalItemsCount
-                        val offset = listState.firstVisibleItemIndex * elementHeight
-                        val scrollbarHeight =
-                            listState.layoutInfo.visibleItemsInfo.size * elementHeight
-                        drawRect(
-                            color = Color.Black.copy(alpha = 0.5f),
-                            topLeft = Offset(size.width - scrollBarWidth.toPx(), offset),
-                            size = Size(scrollBarWidth.toPx(), scrollbarHeight)
+            if (allUnassignedOrders == null) {
+                Column {
+                    Text("VIVEK")
+                }
+            } else {
+                LazyColumn(
+                    state = listState,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .drawBehind {
+                            val elementHeight = size.height / listState.layoutInfo.totalItemsCount
+                            val offset = listState.firstVisibleItemIndex * elementHeight
+                            val scrollbarHeight =
+                                listState.layoutInfo.visibleItemsInfo.size * elementHeight
+                            drawRect(
+                                color = Color.Black.copy(alpha = 0.5f),
+                                topLeft = Offset(size.width - scrollBarWidth.toPx(), offset),
+                                size = Size(scrollBarWidth.toPx(), scrollbarHeight)
+                            )
+                        }
+                        .padding(end = scrollBarWidth)
+                ) {
+                    itemsIndexed(allUnassignedOrders.reversed()) { index, item ->
+                        PickupItem(
+                            delId = item.orderKey,
+                            quantity = item.groupOrderIds.size,
+                            orderType = when (item.deliveryType) {
+                                "pickup" -> "Shop Pickup"
+                                else -> "LenZ Pickup"
+                            },
+                            earning = item.paymentAmount,
+                            bgColor = Color.White,
+                            onCardClick = {
+                                navController.navigate(NavigationDestination.PickupDetails.name + "/${item.orderKey}")
+                            },
+                            onAssignSwipe = {
+                                deliveryViewModel.selfAssignRider(
+                                    groupOrderId = item.groupOrderIds.first(),
+                                    pickupRiderId = deliveryViewModel.riderObjectId
+                                )
+                                isAssigned = true
+                            }
                         )
                     }
-                    .padding(end = scrollBarWidth)
-            ) {
-                itemsIndexed(allUnassignedOrders.reversed()) { index, item ->
-                    PickupItem(
-                        delId = item.orderKey,
-                        quantity = item.groupOrderIds.size,
-                        orderType = when (item.deliveryType) {
-                            "pickup" -> "Shop Pickup"
-                            else -> "LenZ Pickup"
-                        },
-                        earning = item.paymentAmount,
-                        bgColor = Color.White,
-                        onCardClick = {
-                            navController.navigate(NavigationDestination.PickupDetails.name + "/${item.orderKey}")
-                        },
-                        onAssignSwipe = {
-                            isRefreshing = true
-                        }
-                    )
                 }
             }
         } else {
+
             TransitOrderDetails(
                 order = incompleteOrder,
                 deliveryViewModel = deliveryViewModel

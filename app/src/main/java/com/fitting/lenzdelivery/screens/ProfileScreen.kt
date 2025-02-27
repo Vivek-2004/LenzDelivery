@@ -92,6 +92,11 @@ fun ProfileScreen(deliveryViewModel: DeliveryViewModel) {
 
             else -> {
                 riderState?.let { rider ->
+                    val buttonContainerColor = if (!rider.isWorking && rider.isAvailable) Color(
+                        parseColor("#38b000")
+                    )
+                    else if (rider.isWorking && !rider.isAvailable) Color.Gray
+                    else Color.Red
                     LaunchedEffect(updatePhone) {
                         if (updatePhone) {
                             try {
@@ -160,7 +165,7 @@ fun ProfileScreen(deliveryViewModel: DeliveryViewModel) {
                                 Color(parseColor("#38b000")).copy(alpha = 0.4f)
                             )
                         ) {
-                            Column( 
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(Color.LightGray)
@@ -266,25 +271,35 @@ fun ProfileScreen(deliveryViewModel: DeliveryViewModel) {
                                     isLoading = true
                                     updateRider = true
                                 }
+                                if (rider.isWorking && !rider.isAvailable) {
+                                    Toast.makeText(
+                                        context,
+                                        "Complete Drops to Port Out",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             },
                             enabled = !isLoading,
                             shape = RoundedCornerShape(12.dp),
+
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (rider.isWorking) Color.Red else Color(
-                                    parseColor("#38b000")
-                                ),
+                                containerColor = buttonContainerColor,
                                 contentColor = Color.Black
                             )
                         ) {
                             if (isLoading) {
                                 CircularProgressIndicator(color = Color.Black)
                             } else {
-                                Text(
-                                    text = if (rider.isWorking) "PORT OUT" else "PORT IN",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 25.sp,
-                                    letterSpacing = 1.2.sp
-                                )
+                                Column(
+
+                                ) {
+                                    Text(
+                                        text = if (rider.isWorking) "PORT OUT" else "PORT IN",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 25.sp,
+                                        letterSpacing = 1.2.sp
+                                    )
+                                }
                             }
                         }
 

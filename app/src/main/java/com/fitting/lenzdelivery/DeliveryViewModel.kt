@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fitting.lenzdelivery.models.AssignOrderReqBody
 import com.fitting.lenzdelivery.models.ChangeWorkingStatus
 import com.fitting.lenzdelivery.models.EditPhoneNumber
 import com.fitting.lenzdelivery.models.GroupOrderData
@@ -13,10 +14,12 @@ import com.fitting.lenzdelivery.models.RiderDetails
 import com.fitting.lenzdelivery.models.RiderOrder
 import com.fitting.lenzdelivery.network.WebSocketManager
 import com.fitting.lenzdelivery.network.deliveryService
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import retrofit2.http.HTTP
 
 class DeliveryViewModel(riderId: String) : ViewModel() {
 
@@ -98,6 +101,27 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
         }
     }
 
+    fun selfAssignRider(
+        groupOrderId: String,
+        pickupRiderId: String
+    ) {
+        println(groupOrderId)
+        viewModelScope.launch {
+            try {
+                val requestBody = AssignOrderReqBody(pickupRiderId = pickupRiderId)
+                // Convert to JSON
+                val jsonRequest = Gson().toJson(requestBody)
+                println("Request JSON: $jsonRequest") // Print the JSON before sending
+                val response = _deliveryService.assignRider(
+                    groupOrderId = groupOrderId,
+                    pickupRiderId = requestBody
+                )
+                println(response)
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+    }
 
     private fun connectSocket() {
         WebSocketManager.connect()

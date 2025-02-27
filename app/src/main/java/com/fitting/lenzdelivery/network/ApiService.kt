@@ -1,5 +1,6 @@
 package com.fitting.lenzdelivery.network
 
+import com.fitting.lenzdelivery.models.AssignOrderReqBody
 import com.fitting.lenzdelivery.models.ChangeWorkingStatus
 import com.fitting.lenzdelivery.models.EditPhoneNumber
 import com.fitting.lenzdelivery.models.LogInRider
@@ -7,11 +8,14 @@ import com.fitting.lenzdelivery.models.LogInRiderResponse
 import com.fitting.lenzdelivery.models.RiderDetails
 import com.fitting.lenzdelivery.models.RiderOrder
 import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Headers
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -54,11 +58,18 @@ interface ApiService {
     suspend fun editWorkingStatus(
         @Path("riderId") riderId: Int,
         @Body newStatus: ChangeWorkingStatus
-    )
+    ): Response<ResponseBody>
 
     @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
     @POST("riders/login")
     suspend fun logInRider(
         @Body loginBody: LogInRider
     ): LogInRiderResponse
+
+    @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
+    @PATCH("orders/{groupOrderId}/accept-pickup")
+    suspend fun assignRider(
+        @Path("groupOrderId") groupOrderId: String,
+        @Body pickupRiderId: AssignOrderReqBody
+    )
 }

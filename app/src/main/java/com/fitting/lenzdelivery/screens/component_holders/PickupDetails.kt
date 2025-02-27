@@ -169,19 +169,21 @@ fun PickupDetails(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        with(order.shopDetails.address) {
-                            Text(
-                                text = "$line1, $line2",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                text = "Landmark: $landmark",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                text = "$city, $state - $pinCode",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                        order.shopDetails?.let {
+                            with(order.shopDetails.address) {
+                                Text(
+                                    text = "$line1, $line2",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = "Landmark: $landmark",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = "$city, $state - $pinCode",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                         }
                     }
                 }
@@ -295,19 +297,21 @@ fun PickupDetails(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        with(order.shopDetails.address) {
-                            Text(
-                                text = "$line1, $line2",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                text = "Landmark: $landmark",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                text = "$city, $state - $pinCode",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                        order.shopDetails?.let {
+                            with(order.shopDetails.address) {
+                                Text(
+                                    text = "$line1, $line2",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = "Landmark: $landmark",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = "$city, $state - $pinCode",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                         }
                     }
                 }

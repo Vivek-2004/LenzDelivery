@@ -67,7 +67,7 @@ data class RiderOrder(
     val isCompleted: Boolean,
     val paymentAmount: Double,
     val createdAt: String,
-    @SerializedName("shop_details") val shopDetails: ShopDetails,
+    @SerializedName("shop_details") val shopDetails: ShopDetails?,
     @SerializedName("group_order_ids") val groupOrderIds: List<String>,
     @SerializedName("grouped_orders") val groupedOrders: List<GroupedOrders>
 )
@@ -89,4 +89,8 @@ data class LogInRiderResponse(
     val message: String,
     val riderId: String,
     val confirmation: Boolean
+)
+
+data class AssignOrderReqBody(
+    @SerializedName("pickup_rider_id") val pickupRiderId: String
 )
