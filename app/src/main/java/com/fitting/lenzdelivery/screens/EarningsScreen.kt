@@ -1,6 +1,10 @@
 package com.fitting.lenzdelivery.screens
 
 import android.graphics.Color.parseColor
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,19 +12,23 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -56,12 +64,21 @@ fun EarningsScreen(
     val pullToRefreshState = rememberPullToRefreshState()
     var isRefreshing by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    val primaryGreen = Color(parseColor("#38b000"))
+    val cardBackground = MaterialTheme.colorScheme.surface
+
+    Box(modifier = Modifier.fillMaxWidth()) {
         when {
             riderState == null -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = primaryGreen,
+                        strokeWidth = 4.dp
+                    )
+                }
             }
 
             else -> {
@@ -75,174 +92,246 @@ fun EarningsScreen(
                             isRefreshing = false
                         }
                     }
+
                     PullToRefreshBox(
                         state = pullToRefreshState,
                         isRefreshing = isRefreshing,
                         onRefresh = {
                             isRefreshing = true
                         },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White.copy(alpha = 0.1f))
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(bottom = 55.dp)
+                                .padding(horizontal = 16.dp, vertical = 12.dp)
                                 .verticalScroll(scrollState),
-                            verticalArrangement = Arrangement.SpaceEvenly,
+                            verticalArrangement = Arrangement.spacedBy(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Column(
+                            EarningsCard(
+                                title = "Total Orders",
+                                value = rider.totalOrders.toString(),
+                                dailyValue = rider.dailyOrders,
+                                dailyValuePrefix = "",
+                                valueSuffix = "",
+                                primaryColor = primaryGreen,
+                                cardBackground = cardBackground
+                            )
+                            EarningsCard(
+                                title = "Total Income",
+                                value = rider.totalEarnings.toString(),
+                                dailyValue = rider.dailyEarnings.toInt(),
+                                dailyValuePrefix = "₹",
+                                valueSuffix = "₹",
+                                primaryColor = primaryGreen,
+                                cardBackground = cardBackground
+                            )
+                            Card(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .weight(1f),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                colors = CardDefaults.cardColors(containerColor = cardBackground),
+                                shape = RoundedCornerShape(16.dp)
                             ) {
-                                Text(
-                                    text = "Total Orders",
-                                    fontSize = 34.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = Color.DarkGray
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(
-                                    text = rider.totalOrders.toString(),
-                                    fontSize = 50.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = Color(parseColor("#38b000"))
-                                )
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "Earning Summary",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.DarkGray
+                                    )
 
-                                if (rider.dailyOrders > 0) {
+                                    Spacer(modifier = Modifier.height(12.dp))
+
                                     Row(
-                                        modifier = Modifier
-                                            .width(60.dp)
-                                            .background(
-                                                Color.Green.copy(alpha = 0.35f),
-                                                shape = RoundedCornerShape(16.dp)
-                                            )
-                                            .clip(RoundedCornerShape(16.dp)),
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        Text(
-                                            text = rider.dailyOrders.toString(),
-                                            fontSize = 15.sp
+                                        SummaryItem(
+                                            title = "Avg. Per Order",
+                                            value = "₹${if (rider.totalOrders > 0) (rider.totalEarnings / rider.totalOrders).toInt() else 0}"
                                         )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Icon(
-                                            modifier = Modifier.size(15.dp),
-                                            painter = painterResource(R.drawable.arrow_up),
-                                            contentDescription = "Orders Increment",
-                                        )
-                                    }
-                                } else {
-                                    Row(
-                                        modifier = Modifier
-                                            .width(130.dp)
-                                            .background(
-                                                Color.Gray.copy(alpha = 0.35f),
-                                                shape = RoundedCornerShape(16.dp)
-                                            )
-                                            .clip(RoundedCornerShape(16.dp)),
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "No Orders Today",
-                                            fontSize = 10.sp
+
+                                        SummaryItem(
+                                            title = "Today",
+                                            value = if (rider.dailyEarnings > 0.0) "₹${rider.dailyEarnings}" else "No earnings"
                                         )
                                     }
                                 }
                             }
-
-                            HorizontalDivider(thickness = 2.dp)
-
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .weight(1f),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = "Total Income",
-                                    fontSize = 34.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = Color.DarkGray
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(
-                                    text = "₹${rider.totalEarnings}",
-                                    fontSize = 50.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = Color(parseColor("#38b000"))
-                                )
-
-                                if (rider.dailyEarnings > 0.0) {
-                                    Row(
-                                        modifier = Modifier
-                                            .wrapContentWidth()
-                                            .background(
-                                                Color.Green.copy(alpha = 0.35f),
-                                                shape = RoundedCornerShape(16.dp)
-                                            )
-                                            .clip(RoundedCornerShape(16.dp)),
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            modifier = Modifier.padding(start = 8.dp),
-                                            text = "₹${rider.dailyEarnings}",
-                                            fontSize = 15.sp
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Icon(
-                                            modifier = Modifier
-                                                .padding(end = 8.dp)
-                                                .size(15.dp),
-                                            painter = painterResource(R.drawable.arrow_up),
-                                            contentDescription = "Earnings Increment",
-                                        )
-                                    }
-                                } else {
-                                    Row(
-                                        modifier = Modifier
-                                            .width(140.dp)
-                                            .background(
-                                                Color.Gray.copy(alpha = 0.35f),
-                                                shape = RoundedCornerShape(16.dp)
-                                            )
-                                            .clip(RoundedCornerShape(16.dp)),
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "No Earnings Today",
-                                            fontSize = 10.sp
-                                        )
-                                    }
-                                }
-                            }
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
-                    }
-
-                    FloatingActionButton(
-                        onClick = {
-                            navController.navigate(NavigationDestination.PaymentsHistory.name)
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(28.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.payment_history),
-                            contentDescription = "Payment History"
-                        )
                     }
                 }
             }
         }
+        FloatingActionButton(
+            onClick = {
+                navController.navigate(NavigationDestination.PaymentsHistory.name)
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(28.dp),
+            containerColor = primaryGreen,
+            contentColor = Color.White
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.payment_history),
+                contentDescription = "Payment History"
+            )
+        }
+    }
+}
+
+@Composable
+fun EarningsCard(
+    title: String,
+    value: String,
+    dailyValue: Int,
+    dailyValuePrefix: String,
+    valueSuffix: String,
+    primaryColor: Color,
+    cardBackground: Color
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = cardBackground),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.DarkGray
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                if (valueSuffix.isNotEmpty()) {
+                    Text(
+                        text = valueSuffix,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = primaryColor
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+
+                Text(
+                    text = value,
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = primaryColor
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AnimatedVisibility(
+                visible = dailyValue > 0,
+                enter = fadeIn(animationSpec = tween(300)),
+                exit = fadeOut(animationSpec = tween(300))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .background(
+                            color = primaryColor.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(24.dp)
+                        )
+                        .clip(RoundedCornerShape(24.dp))
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "$dailyValuePrefix$dailyValue",
+                        fontSize = this@AnimatedVisibility.run { if (dailyValuePrefix.isNotEmpty()) 16.sp else 18.sp },
+                        fontWeight = FontWeight.Bold,
+                        color = primaryColor
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .background(primaryColor, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(16.dp),
+                            painter = painterResource(R.drawable.arrow_up),
+                            contentDescription = "Increment",
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
+
+            AnimatedVisibility(
+                visible = dailyValue <= 0,
+                enter = fadeIn(animationSpec = tween(300)),
+                exit = fadeOut(animationSpec = tween(300))
+            ) {
+                Text(
+                    text = if (title.contains("Orders")) "No Orders Today" else "No Earnings Today",
+                    fontSize = (16.sp),
+                    color = Color.Gray,
+                    modifier = Modifier
+                        .background(
+                            color = Color.LightGray.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SummaryItem(
+    title: String,
+    value: String
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color.DarkGray
+        )
     }
 }

@@ -2,18 +2,28 @@ package com.fitting.lenzdelivery.screens.component_holders
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -29,10 +39,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.fitting.lenzdelivery.DeliveryViewModel
+import com.fitting.lenzdelivery.R
 import com.fitting.lenzdelivery.formDate
 import com.fitting.lenzdelivery.screens.components.PaymentHistoryItem
 import com.fitting.lenzdelivery.toIST
@@ -61,7 +76,17 @@ fun PaymentsHistory(
             updateHistory = false
         }
     }
-    val scrollBarWidth = 5.dp
+
+    // Theme colors
+    val primaryGreen = Color(android.graphics.Color.parseColor("#38b000"))
+    val backgroundGradient = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFFF8F9FA),
+            Color(0xFFE9ECEF)
+        )
+    )
+
+    val scrollBarWidth = 4.dp
     val listState = rememberLazyListState()
     val pullToRefreshState = rememberPullToRefreshState()
 
@@ -80,24 +105,68 @@ fun PaymentsHistory(
             verticalArrangement = Arrangement.Center
         ) {
             var showLoading by remember { mutableStateOf(true) }
-            if (showLoading) {
+
+            AnimatedVisibility(
+                visible = showLoading,
+                enter = fadeIn(),
+                exit = fadeOut(animationSpec = tween(500))
+            ) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(80.dp),
-                    strokeWidth = 8.dp,
-                    color = Color.Black.copy(alpha = 0.8f)
-                )
-
-                LaunchedEffect(Unit) {
-                    delay(3000)
-                    showLoading = false
-                }
-            } else {
-                Text(
-                    text = "No Previous Earnings",
-                    fontWeight = FontWeight.Bold
+                    strokeWidth = 6.dp,
+                    color = primaryGreen
                 )
             }
+
+            LaunchedEffect(Unit) {
+                delay(3000)
+                showLoading = false
+            }
+
+            AnimatedVisibility(
+                visible = !showLoading,
+                enter = fadeIn(animationSpec = tween(500)) +
+                        slideInVertically(animationSpec = tween(500)) { it / 2 }
+            ) {
+                Card(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.payment_history),
+                            contentDescription = "No Payments",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(56.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "No Previous Earnings",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = Color.DarkGray
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Completed deliveries will appear here",
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
         }
+
     } else {
         PullToRefreshBox(
             state = pullToRefreshState,
@@ -105,41 +174,97 @@ fun PaymentsHistory(
             onRefresh = {
                 isRefreshing = true
             },
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White.copy(alpha = 0.1f))
+            modifier = Modifier.fillMaxSize()
         ) {
-            LazyColumn(
-                state = listState,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 50.dp)
-                    .drawBehind {
-                        val elementHeight = this.size.height / listState.layoutInfo.totalItemsCount
-                        val offset =
-                            listState.layoutInfo.visibleItemsInfo.first().index * elementHeight
-                        val scrollbarHeight =
-                            listState.layoutInfo.visibleItemsInfo.size * elementHeight
-                        drawRect(
-                            color = Color.Black.copy(alpha = 0.5f),
-                            topLeft = Offset(this.size.width - scrollBarWidth.toPx(), offset),
-                            size = Size(scrollBarWidth.toPx(), scrollbarHeight)
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Summary card
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Payment Summary",
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.DarkGray
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        val totalPayments = deliveryViewModel.riderOrders
+                            .filter { it.riderId == deliveryViewModel.riderObjectId && it.isCompleted }
+                            .sumOf { it.paymentAmount }
+
+                        Text(
+                            text = "₹${totalPayments}",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = primaryGreen
+                        )
+
+                        Text(
+                            text = "Total Earnings",
+                            fontSize = 12.sp,
+                            color = Color.Gray
                         )
                     }
-                    .padding(end = scrollBarWidth)
-            ) {
-                itemsIndexed(deliveryViewModel.riderOrders.reversed()) { index, item ->
-                    if (item.riderId == deliveryViewModel.riderObjectId && item.isCompleted) {
+                }
+
+                LazyColumn(
+                    state = listState,
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 100.dp,
+                        top = 8.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .drawBehind {
+                            if (listState.layoutInfo.totalItemsCount > 0) {
+                                val scrollableHeight = this.size.height
+                                val scrollbarHeight =
+                                    (listState.layoutInfo.visibleItemsInfo.size.toFloat() /
+                                            listState.layoutInfo.totalItemsCount) * scrollableHeight
+                                val scrollPosition = (listState.firstVisibleItemIndex.toFloat() /
+                                        listState.layoutInfo.totalItemsCount) * (scrollableHeight - scrollbarHeight)
+
+                                drawRoundRect(
+                                    color = Color.Gray.copy(alpha = 0.3f),
+                                    topLeft = Offset(
+                                        this.size.width - scrollBarWidth.toPx(),
+                                        scrollPosition
+                                    ),
+                                    size = Size(scrollBarWidth.toPx(), scrollbarHeight),
+                                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(
+                                        scrollBarWidth.toPx() / 2
+                                    )
+                                )
+                            }
+                        }
+                ) {
+                    itemsIndexed(
+                        items = deliveryViewModel.riderOrders
+                            .filter { it.riderId == deliveryViewModel.riderObjectId && it.isCompleted }
+                            .reversed()
+                    ) { index, item ->
                         PaymentHistoryItem(
                             index = index,
                             orderId = item.orderKey,
                             paymentAmount = item.paymentAmount,
                             date = item.createdAt.formDate(),
                             time = item.createdAt.toIST()
-                        )
-                        HorizontalDivider(
-                            color = Color.Black
                         )
                     }
                 }

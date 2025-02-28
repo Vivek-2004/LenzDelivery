@@ -6,7 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fitting.lenzdelivery.models.AssignOrderReqBody
+import com.fitting.lenzdelivery.models.AssignDeliveryReqBody
+import com.fitting.lenzdelivery.models.AssignPickupReqBody
 import com.fitting.lenzdelivery.models.ChangeWorkingStatus
 import com.fitting.lenzdelivery.models.EditPhoneNumber
 import com.fitting.lenzdelivery.models.GroupOrderData
@@ -14,6 +15,7 @@ import com.fitting.lenzdelivery.models.OtpCode
 import com.fitting.lenzdelivery.models.RiderDetails
 import com.fitting.lenzdelivery.models.RiderOrder
 import com.fitting.lenzdelivery.models.VerifyAdminOtp
+import com.fitting.lenzdelivery.models.VerifyAdminPickupOtpReqBody
 import com.fitting.lenzdelivery.network.WebSocketManager
 import com.fitting.lenzdelivery.network.deliveryService
 import com.google.gson.Gson
@@ -21,7 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import retrofit2.http.HTTP
+import retrofit2.HttpException
 
 class DeliveryViewModel(riderId: String) : ViewModel() {
 
@@ -103,22 +105,47 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
         }
     }
 
-    fun selfAssignRider(
+    fun assignPickupRider(
         groupOrderId: String,
-        pickupRiderId: String
+        pickupRiderId: String = riderObjectId
     ) {
         viewModelScope.launch {
             try {
-                val requestBody = AssignOrderReqBody(pickupRiderId = pickupRiderId)
+                val requestBody = AssignPickupReqBody(pickupRiderId = pickupRiderId)
                 // Convert to JSON
                 val jsonRequest = Gson().toJson(requestBody)
                 println("Request JSON: $jsonRequest") // Print the JSON before sending
-                val response = _deliveryService.assignRider(
+                val response = _deliveryService.assignPickupRider(
                     groupOrderId = groupOrderId,
                     pickupRiderId = requestBody
                 )
                 println(response)
             } catch (e: Exception) {
+                println(e)
+            }
+        }
+    }
+
+    fun assignDeliveryRider(
+        pickupKey: String,
+        pickupRiderId: String = riderObjectId
+    ) {
+        viewModelScope.launch {
+            try {
+                val reqBody = AssignDeliveryReqBody(
+                    adminPickupKey = pickupKey,
+                    deliveryRiderId = pickupRiderId
+                )
+                val response = _deliveryService.assignDeliveryRider(
+                    deliveryReqBody = reqBody
+                )
+
+                if (response.isSuccessful) {
+                    println("success" + response.body())
+                } else {
+                    println("unsuccess" + response.body())
+                }
+            } catch (e: HttpException) {
                 println(e)
             }
         }
@@ -172,12 +199,35 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
                 )
 
                 if (response.isSuccessful) {
-                    println("SUCCESFUL"+response)
+                    println("SUCCESFUL" + response)
                 } else {
-                    println("UNSUCCESFUL"+response)
+                    println("UNSUCCESFUL" + response)
                 }
 
-            } catch(e: Exception) {
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+    }
+
+    fun verifyAdminPickupOtp(
+        orderKey: String,
+        otpCode: String,
+        riderId: String = riderObjectId
+    ) {
+        viewModelScope.launch {
+            try {
+                val reqBody = VerifyAdminPickupOtpReqBody(
+                    riderId = riderId,
+                    otpCode = otpCode
+                )
+                println(reqBody)
+                val response = _deliveryService.verifyAdminPickupOtp(
+                    orderKey = orderKey,
+                    body = reqBody
+                )
+                println("Body" + response.code())
+            } catch (e: HttpException) {
                 println(e)
             }
         }

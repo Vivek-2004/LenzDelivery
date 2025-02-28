@@ -49,7 +49,8 @@ data class GroupedOrders(
     val dealerName: String,
     val phone: String,
     val alternatePhone: String,
-    val address: ShopAddress
+    val address: ShopAddress,
+    val orders: List<String>
 )
 
 data class ShopDetails(
@@ -93,8 +94,13 @@ data class LogInRiderResponse(
     val confirmation: Boolean
 )
 
-data class AssignOrderReqBody(
+data class AssignPickupReqBody(
     @SerializedName("pickup_rider_id") val pickupRiderId: String
+)
+
+data class AssignDeliveryReqBody(
+    @SerializedName("admin_pickup_key") val adminPickupKey: String,
+    @SerializedName("delivery_rider_id") val deliveryRiderId: String
 )
 
 data class OtpCode(
@@ -106,7 +112,7 @@ data class VerifyAdminOtp(
     @SerializedName("rider_id") val riderObjectId: String
 )
 
-data class VerifyPickupOtpResponse(
-    val message: String,
-    val otp: String
+data class VerifyAdminPickupOtpReqBody(
+    @SerializedName("rider_id") val riderId: String,
+    @SerializedName("otp_code") val otpCode: String
 )

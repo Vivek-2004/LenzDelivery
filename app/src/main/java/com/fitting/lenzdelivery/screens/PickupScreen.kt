@@ -30,7 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.navigation.NavigationDestination
-import com.fitting.lenzdelivery.screens.component_holders.Details.TransitOrderDetails
+import com.fitting.lenzdelivery.screens.component_holders.details.TransitOrderDetails
 import com.fitting.lenzdelivery.screens.components.PickupItem
 import kotlinx.coroutines.delay
 
@@ -55,7 +55,7 @@ fun PickupScreen(
     }
 
     val incompleteOrder =
-        riderOrders.firstOrNull { it.riderId == deliveryViewModel.riderObjectId && !it.isCompleted }
+        riderOrders.firstOrNull { it.riderId == deliveryViewModel.riderObjectId && !it.isCompleted && !it.isDropVerified }
 
     LaunchedEffect(isRefreshing) {
         if (!isRefreshing) return@LaunchedEffect
@@ -123,10 +123,15 @@ fun PickupScreen(
                                 navController.navigate(NavigationDestination.PickupDetails.name + "/${item.orderKey}")
                             },
                             onAssignSwipe = {
-                                deliveryViewModel.selfAssignRider(
-                                    groupOrderId = item.groupOrderIds.first(),
-                                    pickupRiderId = deliveryViewModel.riderObjectId
-                                )
+                                if (item.deliveryType == "pickup") {
+                                    deliveryViewModel.assignPickupRider(
+                                        groupOrderId = item.groupOrderIds.first()
+                                    )
+                                } else {
+                                    deliveryViewModel.assignDeliveryRider(
+                                        pickupKey = item.orderKey
+                                    )
+                                }
                                 isAssigned = true
                             }
                         )
@@ -134,7 +139,6 @@ fun PickupScreen(
                 }
             }
         } else {
-
             TransitOrderDetails(
                 order = incompleteOrder,
                 deliveryViewModel = deliveryViewModel

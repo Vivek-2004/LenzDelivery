@@ -1,6 +1,7 @@
 package com.fitting.lenzdelivery.network
 
-import com.fitting.lenzdelivery.models.AssignOrderReqBody
+import com.fitting.lenzdelivery.models.AssignDeliveryReqBody
+import com.fitting.lenzdelivery.models.AssignPickupReqBody
 import com.fitting.lenzdelivery.models.ChangeWorkingStatus
 import com.fitting.lenzdelivery.models.EditPhoneNumber
 import com.fitting.lenzdelivery.models.LogInRider
@@ -9,7 +10,7 @@ import com.fitting.lenzdelivery.models.OtpCode
 import com.fitting.lenzdelivery.models.RiderDetails
 import com.fitting.lenzdelivery.models.RiderOrder
 import com.fitting.lenzdelivery.models.VerifyAdminOtp
-import com.fitting.lenzdelivery.models.VerifyPickupOtpResponse
+import com.fitting.lenzdelivery.models.VerifyAdminPickupOtpReqBody
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -71,22 +72,35 @@ interface ApiService {
 
     @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
     @PATCH("orders/{groupOrderId}/accept-pickup")
-    suspend fun assignRider(
+    suspend fun assignPickupRider(
         @Path("groupOrderId") groupOrderId: String,
-        @Body pickupRiderId: AssignOrderReqBody
+        @Body pickupRiderId: AssignPickupReqBody
     )
+
+    @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
+    @POST("orders/assign-rider")
+    suspend fun assignDeliveryRider(
+        @Body deliveryReqBody: AssignDeliveryReqBody
+    ): Response<ResponseBody>
 
     @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
     @POST("orders/{groupOrderId}/verify-pickup-otp")
     suspend fun verifyPickupOtp(
         @Path("groupOrderId") groupOrderId: String,
         @Body otpCode: OtpCode
-    ): Response<ResponseBody>//VerifyPickupOtpResponse
+    ): Response<ResponseBody>
 
     @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
     @POST("orders/{groupOrderId}/verify-admin-otp")
     suspend fun verifyAdminOtp(
         @Path("groupOrderId") groupOrderId: String,
         @Body body: VerifyAdminOtp
+    ): Response<ResponseBody>
+
+    @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
+    @POST("orders/{orderKey}/verify-admin-pickup-otp")
+    suspend fun verifyAdminPickupOtp(
+        @Path("orderKey") orderKey: String,
+        @Body body: VerifyAdminPickupOtpReqBody
     ): Response<ResponseBody>
 }
