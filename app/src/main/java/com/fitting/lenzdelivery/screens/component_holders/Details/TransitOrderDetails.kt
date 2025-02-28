@@ -3,14 +3,16 @@ package com.fitting.lenzdelivery.screens.component_holders.Details
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsBike
@@ -30,15 +33,21 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PinDrop
 import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.Payments
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,11 +56,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.models.RiderOrder
+import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -67,10 +77,80 @@ fun TransitOrderDetails(
     val dateFormatter = DateTimeFormatter
         .ofPattern("MMM dd, yyyy • hh:mm a")
         .withZone(ZoneId.systemDefault())
-
     val createdAtInstant = Instant.parse(order.createdAt)
     val formattedDate = dateFormatter.format(createdAtInstant)
     val scrollState = rememberScrollState()
+
+    var showOtpDialog by remember { mutableStateOf(false) }
+    var tempOtp by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+
+    var verifyOtp by remember { mutableStateOf(false) }
+
+    LaunchedEffect(verifyOtp) {
+        if (!verifyOtp) return@LaunchedEffect
+        try {
+            println("In Launched Effect")
+            println(tempOtp)
+            deliveryViewModel.verifyPickupOtp(
+                groupOrderId = order.groupOrderIds.first(),
+                otpCode = tempOtp
+            )
+            delay(1200)
+        } finally {
+            deliveryViewModel.getRiderOrders()
+            verifyOtp = false
+        }
+    }
+
+    if (showOtpDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showOtpDialog = false
+                errorMessage = ""
+                tempOtp = ""
+            },
+            title = {
+                Row(
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "Enter OTP to Verify")
+                }
+            },
+            text = {
+                Column {
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = tempOtp,
+                        onValueChange = { tempOtp = it },
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.NumberPassword
+                        ),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(
+                        text = errorMessage,
+                        fontSize = 12.sp,
+                        color = Color.Red
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    enabled = tempOtp.length == 4,
+                    onClick = {
+                        showOtpDialog = false
+                        errorMessage = ""
+                        verifyOtp = true
+                        Toast.makeText(context, "OTP Verified Successfully", Toast.LENGTH_SHORT)
+                            .show()
+                    }) {
+                    Text(text = "Verify", fontSize = 14.5.sp)
+                }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -226,7 +306,6 @@ fun TransitOrderDetails(
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(8.dp)
                             ) {
                                 Text(
                                     text = "${index + 1}.",
@@ -236,17 +315,34 @@ fun TransitOrderDetails(
                                 )
 
                                 Text(
-                                    text = groupId.takeLast(5).toUpperCase(Locale.ROOT),
+                                    text = groupId.takeLast(5).uppercase(Locale.ROOT),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     fontFamily = FontFamily.SansSerif
                                 )
 
+                                Spacer(modifier = Modifier.width(80.dp))
 
+                                Box(
+                                    modifier = Modifier
+                                        .border(
+                                            1.dp,
+                                            Color.Black,
+                                            shape = RoundedCornerShape(4.dp)
+                                        )
+                                        .clickable {
+                                            showOtpDialog = true
+                                        }
+                                        .padding(8.dp)
+                                ) {
+                                    Text(
+                                        text = if (order.isPickupVerified) "Verify Drop OTP" else "Verify Pickup OTP",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
-
-                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
             }

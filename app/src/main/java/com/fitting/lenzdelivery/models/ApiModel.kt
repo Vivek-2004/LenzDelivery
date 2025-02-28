@@ -65,6 +65,8 @@ data class RiderOrder(
     @SerializedName("delivery_type") val deliveryType: String,
     @SerializedName("order_key") val orderKey: String,
     val isCompleted: Boolean,
+    val isPickupVerified: Boolean,
+    val isDropVerified: Boolean,
     val paymentAmount: Double,
     val createdAt: String,
     @SerializedName("shop_details") val shopDetails: ShopDetails?,
@@ -93,4 +95,18 @@ data class LogInRiderResponse(
 
 data class AssignOrderReqBody(
     @SerializedName("pickup_rider_id") val pickupRiderId: String
+)
+
+data class OtpCode(
+    @SerializedName("otp_code") val otpCode: String
+)
+
+data class VerifyAdminOtp(
+    @SerializedName("otp_code") val otpCode: String,
+    @SerializedName("rider_id") val riderObjectId: String
+)
+
+data class VerifyPickupOtpResponse(
+    val message: String,
+    val otp: String
 )

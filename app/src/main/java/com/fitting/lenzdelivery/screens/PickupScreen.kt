@@ -56,7 +56,6 @@ fun PickupScreen(
 
     val incompleteOrder =
         riderOrders.firstOrNull { it.riderId == deliveryViewModel.riderObjectId && !it.isCompleted }
-    println(incompleteOrder.toString() + "gosh")
 
     LaunchedEffect(isRefreshing) {
         if (!isRefreshing) return@LaunchedEffect

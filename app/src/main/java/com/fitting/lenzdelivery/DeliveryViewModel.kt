@@ -10,8 +10,10 @@ import com.fitting.lenzdelivery.models.AssignOrderReqBody
 import com.fitting.lenzdelivery.models.ChangeWorkingStatus
 import com.fitting.lenzdelivery.models.EditPhoneNumber
 import com.fitting.lenzdelivery.models.GroupOrderData
+import com.fitting.lenzdelivery.models.OtpCode
 import com.fitting.lenzdelivery.models.RiderDetails
 import com.fitting.lenzdelivery.models.RiderOrder
+import com.fitting.lenzdelivery.models.VerifyAdminOtp
 import com.fitting.lenzdelivery.network.WebSocketManager
 import com.fitting.lenzdelivery.network.deliveryService
 import com.google.gson.Gson
@@ -105,7 +107,6 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
         groupOrderId: String,
         pickupRiderId: String
     ) {
-        println(groupOrderId)
         viewModelScope.launch {
             try {
                 val requestBody = AssignOrderReqBody(pickupRiderId = pickupRiderId)
@@ -118,6 +119,65 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
                 )
                 println(response)
             } catch (e: Exception) {
+                println(e)
+            }
+        }
+    }
+
+    fun verifyPickupOtp(
+        groupOrderId: String,
+        otpCode: String
+    ) {
+        viewModelScope.launch {
+            try {
+                val requestBody = OtpCode(
+                    otpCode = otpCode
+                )
+                // Convert to JSON
+//                val jsonRequest = Gson().toJson(requestBody)
+//                println("Request JSON: $jsonRequest")
+
+                val response = _deliveryService.verifyPickupOtp(
+                    groupOrderId = groupOrderId,
+                    otpCode = requestBody
+                )
+
+//                if (response.isSuccessful) {
+//                    println("SUCCESFUL"+response)
+//                } else {
+//                    println("UNSUCCESFUL"+response)
+//                }
+            } catch (e: Exception) {
+//                println(e)
+            }
+        }
+    }
+
+    fun verifyAdminOtp(
+        groupOrderId: String,
+        otp: String
+    ) {
+        viewModelScope.launch {
+            try {
+                val requestBody = VerifyAdminOtp(
+                    otpCode = otp,
+                    riderObjectId = riderObjectId
+                )
+                val jsonRequest = Gson().toJson(requestBody)
+                println("Request JSON: $jsonRequest")
+
+                val response = _deliveryService.verifyAdminOtp(
+                    groupOrderId = groupOrderId,
+                    body = requestBody
+                )
+
+                if (response.isSuccessful) {
+                    println("SUCCESFUL"+response)
+                } else {
+                    println("UNSUCCESFUL"+response)
+                }
+
+            } catch(e: Exception) {
                 println(e)
             }
         }

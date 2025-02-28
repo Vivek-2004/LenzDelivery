@@ -45,7 +45,6 @@ fun PickupDetails(
 ) {
     val scrollState = rememberScrollState()
     val order = deliveryViewModel.riderOrders.first { it.orderKey == orderKey }
-    println("VIVEK" + order)
     val dateFormatter = DateTimeFormatter
         .ofPattern("MMM dd, yyyy hh:mm a")
         .withZone(ZoneId.systemDefault())
