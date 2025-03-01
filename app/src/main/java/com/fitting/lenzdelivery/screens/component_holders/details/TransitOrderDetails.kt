@@ -204,7 +204,7 @@ fun TransitOrderDetails(
                     .padding(20.dp)
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
-                    Text(text = "No more Drops • Complete Transit", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(text = "No More Drops • Complete Transit", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
             }
         } else {
@@ -511,11 +511,12 @@ fun LocationDetails(order: RiderOrder) {
             icon = Icons.Default.LocationOn
         ) {
             order.shopDetails?.address?.let {
-                ShopAddressCardRedesigned(
+                ShopAddressCard(
                     shopName = order.shopDetails.shopName,
                     dealerName = order.shopDetails.dealerName,
                     address = it,
-                    phone = order.shopDetails.phone
+                    phone = order.shopDetails.phone,
+                    isPickupVerified = order.isPickupVerified
                 )
             }
         }
@@ -526,14 +527,14 @@ fun LocationDetails(order: RiderOrder) {
             title = "Drop At",
             icon = Icons.Default.PinDrop
         ) {
-            AdminAddressCardRedesigned()
+            AdminAddressCard(order = order)
         }
     } else {
         Section(
             title = "Pickup From",
             icon = Icons.Default.LocationOn
         ) {
-            AdminAddressCardRedesigned()
+            AdminAddressCard(order = order)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -543,7 +544,10 @@ fun LocationDetails(order: RiderOrder) {
             icon = Icons.Default.PinDrop
         ) {
             order.groupedOrders.forEach { groupedOrder ->
-                ShopAddressCardForDeliveryRedesigned(order = groupedOrder)
+                ShopAddressCardForDelivery(
+                    order = groupedOrder,
+                    riderOrder = order
+                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
@@ -551,11 +555,12 @@ fun LocationDetails(order: RiderOrder) {
 }
 
 @Composable
-fun ShopAddressCardRedesigned(
+fun ShopAddressCard(
     shopName: String,
     dealerName: String,
     address: ShopAddress,
-    phone: String
+    phone: String,
+    isPickupVerified: Boolean //haathi
 ) {
     val context = LocalContext.current
     Card(
@@ -568,6 +573,10 @@ fun ShopAddressCardRedesigned(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(
+                    if (isPickupVerified) Color.Green.copy(alpha = 0.3f)
+                    else Color.Unspecified
+                )
                 .padding(16.dp)
         ) {
             Row(
@@ -683,7 +692,7 @@ fun ShopAddressCardRedesigned(
 }
 
 @Composable
-fun ShopAddressCardForDeliveryRedesigned(order: GroupedOrders) {
+fun ShopAddressCardForDelivery(order: GroupedOrders, riderOrder: RiderOrder) {
     val context = LocalContext.current
 
     Card(
@@ -696,6 +705,10 @@ fun ShopAddressCardForDeliveryRedesigned(order: GroupedOrders) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(
+                    if (riderOrder.isDropVerified) Color.Green.copy(alpha = 0.3f)
+                    else Color.Unspecified
+                )
                 .padding(16.dp)
         ) {
             Row(
@@ -903,7 +916,7 @@ fun ExpandableOrderList(orders: List<String>) {
 }
 
 @Composable
-fun AdminAddressCardRedesigned() {
+fun AdminAddressCard(order: RiderOrder) {
     val context = LocalContext.current
 
     Card(
@@ -916,6 +929,10 @@ fun AdminAddressCardRedesigned() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(
+                    if (order.isPickupVerified || order.isDropVerified) Color.Green.copy(alpha = 0.3f)
+                    else Color.Unspecified
+                )
                 .padding(16.dp)
         ) {
             Row(
@@ -1050,7 +1067,7 @@ fun GroupOrderSection(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                groupOrderIds.forEachIndexed { index, groupOrderId ->
+                groupOrderIds.reversed().forEachIndexed { index, groupOrderId ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
