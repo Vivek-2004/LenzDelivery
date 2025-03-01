@@ -66,10 +66,14 @@ fun TopAppBar(
                 Text(
                     text = title,
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 40.sp
+                    fontSize = 40.sp,
+                    color = Color.LightGray
                 )
             }
         },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.DarkGray
+        ),
         navigationIcon = {
             if (showNavigationIcon) {
                 IconButton(

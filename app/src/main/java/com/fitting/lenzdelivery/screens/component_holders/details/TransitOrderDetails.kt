@@ -70,6 +70,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fitting.lenzdelivery.DeliveryViewModel
+import com.fitting.lenzdelivery.models.GroupOrders
 import com.fitting.lenzdelivery.models.GroupedOrders
 import com.fitting.lenzdelivery.models.RiderOrder
 import com.fitting.lenzdelivery.models.ShopAddress
@@ -88,6 +89,7 @@ fun TransitOrderDetails(
     order: RiderOrder,
     deliveryViewModel: DeliveryViewModel
 ) {
+    println(order)
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val dateFormatter = DateTimeFormatter
@@ -111,18 +113,18 @@ fun TransitOrderDetails(
             if (order.deliveryType == "pickup") {
                 if (!order.isPickupVerified) { // Shop Pickup
                     otpVerifyToast = deliveryViewModel.verifyPickupOtp(
-                        groupOrderId = order.groupOrderIds.first(),
+                        groupOrderId = order.groupOrderIds.first().groupOrderId,
                         otpCode = enteredOtp
                     )
                 } else { // Admin Drop
                     otpVerifyToast = deliveryViewModel.verifyAdminOtp(
-                        groupOrderId = order.groupOrderIds.first(),
+                        groupOrderId = order.groupOrderIds.first().groupOrderId,
                         otpCode = enteredOtp
                     )
                 }
             }
             if (order.deliveryType == "delivery") {
-                if(!order.isPickupVerified) { // Admin Pickup
+                if (!order.isPickupVerified) { // Admin Pickup
                     otpVerifyToast = deliveryViewModel.verifyAdminPickupOtp(
                         orderKey = order.orderKey,
                         otpCode = enteredOtp
@@ -195,7 +197,7 @@ fun TransitOrderDetails(
         LocationDetails(order = order)
 
         // Group Orders - Enhanced with better visual hierarchy
-        if(order.isPickupVerified && order.isDropVerified) {
+        if (order.isPickupVerified && order.isDropVerified) {
             Card(
                 shape = RoundedCornerShape(8.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.LightGray.copy(alpha = 0.6f)),
@@ -204,7 +206,11 @@ fun TransitOrderDetails(
                     .padding(20.dp)
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
-                    Text(text = "No More Drops • Complete Transit", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(
+                        text = "No More Drops • Complete Transit",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
                 }
             }
         } else {
@@ -546,7 +552,7 @@ fun LocationDetails(order: RiderOrder) {
             order.groupedOrders.forEach { groupedOrder ->
                 ShopAddressCardForDelivery(
                     order = groupedOrder,
-                    riderOrder = order
+                    riderOrder = order,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -560,7 +566,7 @@ fun ShopAddressCard(
     dealerName: String,
     address: ShopAddress,
     phone: String,
-    isPickupVerified: Boolean //haathi
+    isPickupVerified: Boolean
 ) {
     val context = LocalContext.current
     Card(
@@ -614,9 +620,7 @@ fun ShopAddressCard(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-
             AddressSeparator()
-
             Spacer(modifier = Modifier.height(12.dp))
 
             if (address != null) {
@@ -692,8 +696,17 @@ fun ShopAddressCard(
 }
 
 @Composable
-fun ShopAddressCardForDelivery(order: GroupedOrders, riderOrder: RiderOrder) {
+fun ShopAddressCardForDelivery(
+    order: GroupedOrders,
+    riderOrder: RiderOrder
+) {
     val context = LocalContext.current
+
+    val allOrdersCompleted = order.orders.all { orderId ->
+        riderOrder.groupOrderIds.any { groupOrder ->
+            groupOrder.groupOrderId == orderId && groupOrder.trackingStatus == "Order Completed"
+        }
+    }
 
     Card(
         modifier = Modifier
@@ -706,7 +719,7 @@ fun ShopAddressCardForDelivery(order: GroupedOrders, riderOrder: RiderOrder) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    if (riderOrder.isDropVerified) Color.Green.copy(alpha = 0.3f)
+                    if (riderOrder.isDropVerified || allOrdersCompleted) Color.Green.copy(alpha = 0.3f)
                     else Color.Unspecified
                 )
                 .padding(16.dp)
@@ -746,9 +759,7 @@ fun ShopAddressCardForDelivery(order: GroupedOrders, riderOrder: RiderOrder) {
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-
             AddressSeparator()
-
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
@@ -791,7 +802,7 @@ fun ShopAddressCardForDelivery(order: GroupedOrders, riderOrder: RiderOrder) {
             Spacer(modifier = Modifier.height(16.dp))
 
             if (order.orders.isNotEmpty()) {
-                ExpandableOrderList(orders = order.orders)
+                ExpandableOrderList(orders = order.orders) //vivek
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -878,7 +889,6 @@ fun ExpandableOrderList(orders: List<String>) {
                     .padding(top = 8.dp)
                     .height((orders.size * 48).coerceAtMost(192).dp)
             ) {
-
                 itemsIndexed(orders) { index, orderId ->
                     Card(
                         modifier = Modifier
@@ -1049,7 +1059,7 @@ fun AddressSeparator() {
 
 @Composable
 fun GroupOrderSection(
-    groupOrderIds: List<String>,
+    groupOrderIds: List<GroupOrders>,
     isPickupVerified: Boolean,
     onVerifyOtp: (String) -> Unit
 ) {
@@ -1067,7 +1077,7 @@ fun GroupOrderSection(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                groupOrderIds.reversed().forEachIndexed { index, groupOrderId ->
+                groupOrderIds.reversed().forEachIndexed { index, groupOrder ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1103,16 +1113,17 @@ fun GroupOrderSection(
                                 )
 
                                 Text(
-                                    text = groupOrderId.takeLast(5).uppercase(Locale.ROOT),
+                                    text = groupOrder.groupOrderId.takeLast(5)
+                                        .uppercase(Locale.ROOT),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     fontFamily = FontFamily.Monospace
                                 )
                             }
                         }
-
                         Button(
-                            onClick = { onVerifyOtp(groupOrderId) },
+                            enabled = groupOrder.trackingStatus != "Order Completed",
+                            onClick = { onVerifyOtp(groupOrder.groupOrderId) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (isPickupVerified)
                                     MaterialTheme.colorScheme.secondaryContainer
@@ -1126,16 +1137,24 @@ fun GroupOrderSection(
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.height(36.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Pin,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = if (isPickupVerified) "Drop OTP" else "Pickup OTP",
-                                style = MaterialTheme.typography.labelMedium
-                            )
+                            if (groupOrder.trackingStatus == "Order Completed") {
+                                Text(
+                                    text = "Verified",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = Color(0xFF008000)
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Pin,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = if (isPickupVerified) "Drop OTP" else "Pickup OTP",
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
                         }
                     }
 

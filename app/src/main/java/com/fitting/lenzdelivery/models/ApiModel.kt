@@ -53,6 +53,11 @@ data class ShopDetails(
     val address: ShopAddress
 )
 
+data class GroupOrders(
+    @SerializedName("_id") val groupOrderId: String,
+    @SerializedName("tracking_status") val trackingStatus: String
+)
+
 data class RiderOrder(
     @SerializedName("rider_id") val riderId: String,
     @SerializedName("delivery_type") val deliveryType: String,
@@ -63,7 +68,7 @@ data class RiderOrder(
     val paymentAmount: Double,
     val createdAt: String,
     @SerializedName("shop_details") val shopDetails: ShopDetails?,
-    @SerializedName("group_order_ids") val groupOrderIds: List<String>,
+    @SerializedName("group_order_ids") val groupOrderIds: List<GroupOrders>,
     @SerializedName("grouped_orders") val groupedOrders: List<GroupedOrders>
 )
 

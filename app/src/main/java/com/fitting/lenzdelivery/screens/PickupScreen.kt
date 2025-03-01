@@ -199,7 +199,7 @@ fun PickupScreen(
                             onAssignSwipe = {
                                 if (item.deliveryType == "pickup") {
                                     deliveryViewModel.assignPickupRider(
-                                        groupOrderId = item.groupOrderIds.first()
+                                        groupOrderId = item.groupOrderIds.first().groupOrderId
                                     )
                                 } else {
                                     deliveryViewModel.assignDeliveryRider(

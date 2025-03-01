@@ -356,7 +356,7 @@ fun PickupDetails(
 
                         order.groupOrderIds.forEach { groupId ->
                             Text(
-                                text = "• $groupId",
+                                text = "• ${groupId.groupOrderId}",
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
