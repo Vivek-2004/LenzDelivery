@@ -78,10 +78,6 @@ fun ProfileScreen(deliveryViewModel: DeliveryViewModel) {
         riderState?.phone?.let { phoneNumber = it }
     }
 
-    LaunchedEffect(Unit) {
-        deliveryViewModel.getRiderDetails()
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         when {
             riderState == null -> {

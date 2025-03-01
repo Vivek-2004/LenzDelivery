@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,7 +52,9 @@ fun MyApp(sharedPref: SharedPreferences) {
         factory = riderId?.let { id -> DeliveryViewModelFactory(id) }
     )
 
-    if (deliveryViewModelInstance.riderOrders.isEmpty()) {
+    val riderState by deliveryViewModelInstance.riderDetails.collectAsState()
+
+    if (riderState == null) {
         Column(
             modifier = Modifier
                 .fillMaxSize()

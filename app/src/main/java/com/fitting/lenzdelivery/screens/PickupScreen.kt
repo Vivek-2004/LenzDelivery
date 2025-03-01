@@ -3,18 +3,35 @@ package com.fitting.lenzdelivery.screens
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardDoubleArrowRight
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +43,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fitting.lenzdelivery.DeliveryViewModel
@@ -41,11 +59,20 @@ fun PickupScreen(
     deliveryViewModel: DeliveryViewModel = viewModel(),
     navController: NavController,
 ) {
+    val scrollState = rememberScrollState()
     val listState = rememberLazyListState()
     val scrollBarWidth = 5.dp
     val pullToRefreshState = rememberPullToRefreshState()
     var isRefreshing by remember { mutableStateOf(false) }
     var isAssigned by remember { mutableStateOf(false) }
+
+    val riderState by deliveryViewModel.riderDetails.collectAsState()
+    var riderIsWorking by remember { mutableStateOf(false) }
+    if (riderState != null) {
+        riderState?.let { rider ->
+            riderIsWorking = rider.isWorking
+        }
+    }
 
     val allUnassignedOrders = deliveryViewModel.riderOrders.filter {
         it.riderId == null
@@ -53,9 +80,8 @@ fun PickupScreen(
     val riderOrders = deliveryViewModel.riderOrders.filter {
         it.riderId == deliveryViewModel.riderObjectId
     }
-
-    val incompleteOrder =
-        riderOrders.firstOrNull { it.riderId == deliveryViewModel.riderObjectId && !it.isCompleted && !it.isDropVerified }
+    val riderIncompleteOrder =
+        riderOrders.firstOrNull { it.riderId == deliveryViewModel.riderObjectId && !it.isCompleted }
 
     LaunchedEffect(isRefreshing) {
         if (!isRefreshing) return@LaunchedEffect
@@ -85,10 +111,58 @@ fun PickupScreen(
             .fillMaxSize()
             .background(Color.White.copy(alpha = 0.09f))
     ) {
-        if (incompleteOrder == null) {
-            if (allUnassignedOrders == null) {
-                Column {
-                    Text("VIVEK")
+        if (!riderIsWorking) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                        .align(Alignment.Center),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "PORT IN to Assign Orders",
+                        fontSize = 20.sp,
+                        color = Color(0xFFD90429)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = {
+                            navController.navigate(NavigationDestination.Profile.name) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                            isRefreshing = true
+                        },
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Black.copy(alpha = 0.9f),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.KeyboardDoubleArrowRight,
+                            contentDescription = "Navigate to Profile Page"
+                        )
+                    }
+                }
+            }
+        }
+        else if (riderIncompleteOrder == null) {
+            if (allUnassignedOrders.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                        .verticalScroll(scrollState),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "No Orders Available Now"
+                    )
                 }
             } else {
                 LazyColumn(
@@ -140,7 +214,7 @@ fun PickupScreen(
             }
         } else {
             TransitOrderDetails(
-                order = incompleteOrder,
+                order = riderIncompleteOrder,
                 deliveryViewModel = deliveryViewModel
             )
         }

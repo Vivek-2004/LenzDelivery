@@ -3,6 +3,7 @@ package com.fitting.lenzdelivery.screens.component_holders.details
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -87,6 +88,7 @@ fun TransitOrderDetails(
     val dateFormatter = DateTimeFormatter
         .ofPattern("MMM dd, yyyy • hh:mm a")
         .withZone(ZoneId.systemDefault())
+
     val createdAtInstant = Instant.parse(order.createdAt)
     val formattedDate = dateFormatter.format(createdAtInstant)
     val scrollState = rememberScrollState()
@@ -95,31 +97,32 @@ fun TransitOrderDetails(
     var tempOtp by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var verifyOtp by remember { mutableStateOf(false) }
+    var otpVerifyToast by remember { mutableStateOf("") }
 
     LaunchedEffect(verifyOtp) {
         if (!verifyOtp) return@LaunchedEffect
         try {
             if (order.deliveryType == "pickup") {
                 if (!order.isPickupVerified) { // Shop Pickup
-                    deliveryViewModel.verifyPickupOtp(
+                    otpVerifyToast = deliveryViewModel.verifyPickupOtp(
                         groupOrderId = order.groupOrderIds.first(),
                         otpCode = tempOtp
                     )
                 } else { // Admin Drop
-                    deliveryViewModel.verifyAdminOtp(
+                    otpVerifyToast = deliveryViewModel.verifyAdminOtp(
                         groupOrderId = order.groupOrderIds.first(),
                         otp = tempOtp
                     )
                 }
             }
             if (order.deliveryType == "delivery") {
-                if (!order.isPickupVerified) { // Admin Pickup
-                    deliveryViewModel.verifyAdminPickupOtp(
+                if(!order.isPickupVerified) { // Admin Pickup
+                    otpVerifyToast = deliveryViewModel.verifyAdminPickupOtp(
                         orderKey = order.orderKey,
                         otpCode = tempOtp
                     )
                 } else { // Admin Drop
-                    deliveryViewModel.verifyAdminOtp(
+                    otpVerifyToast = deliveryViewModel.verifyAdminOtp(
                         groupOrderId = order.groupOrderIds.first(),
                         otp = tempOtp
                     )
@@ -129,12 +132,23 @@ fun TransitOrderDetails(
         } finally {
             deliveryViewModel.getRiderOrders()
             verifyOtp = false
+            tempOtp = ""
         }
+    }
+
+    if (otpVerifyToast.isNotEmpty()) {
+        Toast.makeText(context, otpVerifyToast, Toast.LENGTH_SHORT).show()
+        otpVerifyToast = ""
     }
 
     // OTP Dialog
     if (showOtpDialog) {
         OtpVerificationDialog(
+            onVerify = {
+                showOtpDialog = false
+                errorMessage = ""
+                verifyOtp = true
+            },
             onDismiss = {
                 showOtpDialog = false
                 errorMessage = ""
@@ -142,13 +156,7 @@ fun TransitOrderDetails(
             },
             tempOtp = tempOtp,
             onOtpChange = { tempOtp = it },
-            errorMessage = errorMessage,
-            onVerify = {
-                showOtpDialog = false
-                errorMessage = ""
-                verifyOtp = true
-//                Toast.makeText(context, "OTP Verified Successfully", Toast.LENGTH_SHORT).show()
-            }
+            errorMessage = errorMessage
         )
     }
 
@@ -222,6 +230,7 @@ fun TransitOrderDetails(
                 context.startActivity(intent)
             },
             onCompleteTransit = {
+
                 deliveryViewModel.getRiderOrders()
             }
         )
@@ -1197,7 +1206,7 @@ fun ActionButtons(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Complete Transit"
+                    text = "Complete Transit",
                 )
             }
         }

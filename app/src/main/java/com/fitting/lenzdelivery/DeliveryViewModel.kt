@@ -151,85 +151,67 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
         }
     }
 
-    fun verifyPickupOtp(
+    suspend fun verifyPickupOtp(
         groupOrderId: String,
         otpCode: String
-    ) {
-        viewModelScope.launch {
-            try {
-                val requestBody = OtpCode(
-                    otpCode = otpCode
-                )
-                // Convert to JSON
-//                val jsonRequest = Gson().toJson(requestBody)
-//                println("Request JSON: $jsonRequest")
+    ): String {
+        return try {
+            val requestBody = OtpCode(
+                otpCode = otpCode
+            )
+            val response = _deliveryService.verifyPickupOtp(
+                groupOrderId = groupOrderId,
+                otpCode = requestBody
+            )
 
-                val response = _deliveryService.verifyPickupOtp(
-                    groupOrderId = groupOrderId,
-                    otpCode = requestBody
-                )
-
-//                if (response.isSuccessful) {
-//                    println("SUCCESFUL"+response)
-//                } else {
-//                    println("UNSUCCESFUL"+response)
-//                }
-            } catch (e: Exception) {
-//                println(e)
-            }
+            if (response.code() == 200) "OTP Verified Successfully"
+            else "Incorrect OTP"
+        } catch (e: Exception) {
+            "Please Try Again"
         }
     }
 
-    fun verifyAdminOtp(
+    suspend fun verifyAdminOtp(
         groupOrderId: String,
         otp: String
-    ) {
-        viewModelScope.launch {
-            try {
-                val requestBody = VerifyAdminOtp(
-                    otpCode = otp,
-                    riderObjectId = riderObjectId
-                )
-                val jsonRequest = Gson().toJson(requestBody)
-                println("Request JSON: $jsonRequest")
+    ): String {
+        return try {
+            val requestBody = VerifyAdminOtp(
+                otpCode = otp,
+                riderObjectId = riderObjectId
+            )
+            val response = _deliveryService.verifyAdminOtp(
+                groupOrderId = groupOrderId,
+                body = requestBody
+            )
 
-                val response = _deliveryService.verifyAdminOtp(
-                    groupOrderId = groupOrderId,
-                    body = requestBody
-                )
-
-                if (response.isSuccessful) {
-                    println("SUCCESFUL" + response)
-                } else {
-                    println("UNSUCCESFUL" + response)
-                }
-
-            } catch (e: Exception) {
-                println(e)
-            }
+            if (response.code() == 200) "OTP Verified Successfully"
+            else "Incorrect OTP"
+        } catch (e: Exception) {
+            "Please Try Again"
         }
     }
 
-    fun verifyAdminPickupOtp(
+    suspend fun verifyAdminPickupOtp(
         orderKey: String,
         otpCode: String,
         riderId: String = riderObjectId
-    ) {
-        viewModelScope.launch {
-            try {
-                val reqBody = VerifyAdminPickupOtpReqBody(
-                    riderId = riderId,
-                    otpCode = otpCode
-                )
-                println(reqBody)
-                val response = _deliveryService.verifyAdminPickupOtp(
-                    orderKey = orderKey,
-                    body = reqBody
-                )
-                println("Body" + response.code())
-            } catch (e: HttpException) {
-                println(e)
-            }
+    ): String {
+        return try {
+            val reqBody = VerifyAdminPickupOtpReqBody(
+                riderId = riderId,
+                otpCode = otpCode
+            )
+
+            val response = _deliveryService.verifyAdminPickupOtp(
+                orderKey = orderKey,
+                body = reqBody
+            )
+
+            if (response.code() == 200) "OTP Verified Successfully"
+            else "Incorrect OTP"
+        } catch (e: Exception) {
+            "Please Try Again"
         }
     }
 

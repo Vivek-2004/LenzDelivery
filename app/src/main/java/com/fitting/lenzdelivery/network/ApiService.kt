@@ -75,7 +75,7 @@ interface ApiService {
     suspend fun assignPickupRider(
         @Path("groupOrderId") groupOrderId: String,
         @Body pickupRiderId: AssignPickupReqBody
-    )
+    ): Response<ResponseBody>
 
     @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
     @POST("orders/assign-rider")
