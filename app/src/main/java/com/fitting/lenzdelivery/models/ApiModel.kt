@@ -11,14 +11,6 @@ data class GroupOrderData(
 )
 //
 
-data class GroupOrder(
-    @SerializedName("_id") val id: String,
-    @SerializedName("tracking_status") var trackingStatus: String,
-    val userId: String
-//    val common_pickup_key: String,
-//    val shop_pickup_key: String
-)
-
 data class RiderDetails(
     val _id: String,
     val riderId: String,
@@ -115,4 +107,8 @@ data class VerifyAdminOtp(
 data class VerifyAdminPickupOtpReqBody(
     @SerializedName("rider_id") val riderId: String,
     @SerializedName("otp_code") val otpCode: String
+)
+
+data class PatchCompleteTransit(
+    val riderId: String
 )

@@ -56,6 +56,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,7 +73,10 @@ import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.models.GroupedOrders
 import com.fitting.lenzdelivery.models.RiderOrder
 import com.fitting.lenzdelivery.models.ShopAddress
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -85,6 +89,7 @@ fun TransitOrderDetails(
     deliveryViewModel: DeliveryViewModel
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val dateFormatter = DateTimeFormatter
         .ofPattern("MMM dd, yyyy • hh:mm a")
         .withZone(ZoneId.systemDefault())
@@ -94,10 +99,11 @@ fun TransitOrderDetails(
     val scrollState = rememberScrollState()
 
     var showOtpDialog by remember { mutableStateOf(false) }
-    var tempOtp by remember { mutableStateOf("") }
+    var enteredOtp by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var verifyOtp by remember { mutableStateOf(false) }
     var otpVerifyToast by remember { mutableStateOf("") }
+    var currentGroupOrderId by remember { mutableStateOf("") }
 
     LaunchedEffect(verifyOtp) {
         if (!verifyOtp) return@LaunchedEffect
@@ -106,12 +112,12 @@ fun TransitOrderDetails(
                 if (!order.isPickupVerified) { // Shop Pickup
                     otpVerifyToast = deliveryViewModel.verifyPickupOtp(
                         groupOrderId = order.groupOrderIds.first(),
-                        otpCode = tempOtp
+                        otpCode = enteredOtp
                     )
                 } else { // Admin Drop
                     otpVerifyToast = deliveryViewModel.verifyAdminOtp(
                         groupOrderId = order.groupOrderIds.first(),
-                        otp = tempOtp
+                        otpCode = enteredOtp
                     )
                 }
             }
@@ -119,20 +125,23 @@ fun TransitOrderDetails(
                 if(!order.isPickupVerified) { // Admin Pickup
                     otpVerifyToast = deliveryViewModel.verifyAdminPickupOtp(
                         orderKey = order.orderKey,
-                        otpCode = tempOtp
+                        otpCode = enteredOtp
                     )
                 } else { // Admin Drop
-                    otpVerifyToast = deliveryViewModel.verifyAdminOtp(
-                        groupOrderId = order.groupOrderIds.first(),
-                        otp = tempOtp
-                    )
+                    if (currentGroupOrderId.isNotEmpty()) {
+                        otpVerifyToast = deliveryViewModel.verifyShopDropOtp(
+                            groupOrderId = currentGroupOrderId,
+                            otpCode = enteredOtp
+                        )
+                    }
                 }
             }
             delay(1500)
         } finally {
             deliveryViewModel.getRiderOrders()
             verifyOtp = false
-            tempOtp = ""
+            enteredOtp = ""
+            currentGroupOrderId = ""
         }
     }
 
@@ -152,10 +161,10 @@ fun TransitOrderDetails(
             onDismiss = {
                 showOtpDialog = false
                 errorMessage = ""
-                tempOtp = ""
+                enteredOtp = ""
             },
-            tempOtp = tempOtp,
-            onOtpChange = { tempOtp = it },
+            tempOtp = enteredOtp,
+            onOtpChange = { enteredOtp = it },
             errorMessage = errorMessage
         )
     }
@@ -185,39 +194,56 @@ fun TransitOrderDetails(
         // Location Details - Enhanced with Maps integration hint
         LocationDetails(order = order)
 
-        // Group Orders - Enhanced with better visual hierarchy  //haathi
-        if (order.deliveryType == "delivery" && !order.isPickupVerified) {
-            Button(
-                onClick = { showOtpDialog = true },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.primary
-                ),
+        // Group Orders - Enhanced with better visual hierarchy
+        if(order.isPickupVerified && order.isDropVerified) {
+            Card(
                 shape = RoundedCornerShape(8.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.LightGray.copy(alpha = 0.6f)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Pin,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "Pickup OTP",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontSize = 18.sp
-                )
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(text = "No more Drops • Complete Transit", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                }
             }
         } else {
-            Spacer(modifier = Modifier.height(16.dp))
-            GroupOrderSection(
-                groupOrderIds = order.groupOrderIds,
-                isPickupVerified = order.isPickupVerified,
-                onVerifyOtp = { showOtpDialog = true }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+            if (order.deliveryType == "delivery" && !order.isPickupVerified) {
+                Button(
+                    onClick = { showOtpDialog = true },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.primary
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Pin,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Pickup OTP",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontSize = 18.sp
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.height(16.dp))
+                GroupOrderSection(
+                    groupOrderIds = order.groupOrderIds,
+                    isPickupVerified = order.isPickupVerified,
+                    onVerifyOtp = { groupId ->
+                        currentGroupOrderId = groupId  // Store the selected ID
+                        showOtpDialog = true
+                    }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
 
         ActionButtons(
@@ -230,8 +256,15 @@ fun TransitOrderDetails(
                 context.startActivity(intent)
             },
             onCompleteTransit = {
-
-                deliveryViewModel.getRiderOrders()
+                coroutineScope.launch {
+                    withContext(Dispatchers.IO) {
+                        deliveryViewModel.completeTransit(
+                            orderKey = order.orderKey
+                        )
+                        delay(1200)
+                        deliveryViewModel.getRiderOrders()
+                    }
+                }
             }
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -479,10 +512,10 @@ fun LocationDetails(order: RiderOrder) {
         ) {
             order.shopDetails?.address?.let {
                 ShopAddressCardRedesigned(
-                    shopName = order.shopDetails?.shopName ?: "",
-                    dealerName = order.shopDetails?.dealerName ?: "",
+                    shopName = order.shopDetails.shopName,
+                    dealerName = order.shopDetails.dealerName,
                     address = it,
-                    phone = order.shopDetails?.phone ?: ""
+                    phone = order.shopDetails.phone
                 )
             }
         }
@@ -1001,7 +1034,7 @@ fun AddressSeparator() {
 fun GroupOrderSection(
     groupOrderIds: List<String>,
     isPickupVerified: Boolean,
-    onVerifyOtp: () -> Unit
+    onVerifyOtp: (String) -> Unit
 ) {
     Section(
         title = "Group Order (${groupOrderIds.size})",
@@ -1017,7 +1050,7 @@ fun GroupOrderSection(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                groupOrderIds.forEachIndexed { index, groupId ->
+                groupOrderIds.forEachIndexed { index, groupOrderId ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1025,7 +1058,6 @@ fun GroupOrderSection(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Order number and ID
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -1054,7 +1086,7 @@ fun GroupOrderSection(
                                 )
 
                                 Text(
-                                    text = groupId.takeLast(5).uppercase(Locale.ROOT),
+                                    text = groupOrderId.takeLast(5).uppercase(Locale.ROOT),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     fontFamily = FontFamily.Monospace
@@ -1062,9 +1094,8 @@ fun GroupOrderSection(
                             }
                         }
 
-                        // OTP Verification Button
                         Button(
-                            onClick = onVerifyOtp,
+                            onClick = { onVerifyOtp(groupOrderId) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (isPickupVerified)
                                     MaterialTheme.colorScheme.secondaryContainer
@@ -1091,16 +1122,15 @@ fun GroupOrderSection(
                         }
                     }
 
-                    // Add separator between items
                     if (index < groupOrderIds.size - 1) {
                         Spacer(modifier = Modifier.height(8.dp))
                         AddressSeparator()
                     }
                 }
-            }  // End of Column
-        }  // End of Card
-    }  // End of Section
-}  // End of GroupOrderSection
+            }
+        }
+    }
+}
 
 @Composable
 fun Section(

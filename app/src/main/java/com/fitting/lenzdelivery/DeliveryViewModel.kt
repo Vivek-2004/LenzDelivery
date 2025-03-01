@@ -12,6 +12,7 @@ import com.fitting.lenzdelivery.models.ChangeWorkingStatus
 import com.fitting.lenzdelivery.models.EditPhoneNumber
 import com.fitting.lenzdelivery.models.GroupOrderData
 import com.fitting.lenzdelivery.models.OtpCode
+import com.fitting.lenzdelivery.models.PatchCompleteTransit
 import com.fitting.lenzdelivery.models.RiderDetails
 import com.fitting.lenzdelivery.models.RiderOrder
 import com.fitting.lenzdelivery.models.VerifyAdminOtp
@@ -173,11 +174,11 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
 
     suspend fun verifyAdminOtp(
         groupOrderId: String,
-        otp: String
+        otpCode: String
     ): String {
         return try {
             val requestBody = VerifyAdminOtp(
-                otpCode = otp,
+                otpCode = otpCode,
                 riderObjectId = riderObjectId
             )
             val response = _deliveryService.verifyAdminOtp(
@@ -202,7 +203,6 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
                 riderId = riderId,
                 otpCode = otpCode
             )
-
             val response = _deliveryService.verifyAdminPickupOtp(
                 orderKey = orderKey,
                 body = reqBody
@@ -212,6 +212,49 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
             else "Incorrect OTP"
         } catch (e: Exception) {
             "Please Try Again"
+        }
+    }
+
+    suspend fun verifyShopDropOtp(
+        groupOrderId: String,
+        otpCode: String,
+        riderId: String = riderObjectId
+    ): String {
+        return try {
+            val reqBody = VerifyAdminPickupOtpReqBody(
+                riderId = riderId,
+                otpCode = otpCode
+            )
+            val response = _deliveryService.verifyShopDropOtp(
+                groupOrderId = groupOrderId,
+                body = reqBody
+            )
+
+            if (response.code() == 200) "OTP Verified Successfully"
+            else "Incorrect OTP"
+        } catch (e: Exception) {
+            "Please Try Again"
+        }
+    }
+
+    fun completeTransit(
+        orderKey: String,
+        riderId: String = riderObjectId
+    ) {
+        viewModelScope.launch {
+            try {
+                val response = _deliveryService.patchCompleteTransit(
+                    orderKey = orderKey,
+                    riderId = PatchCompleteTransit(
+                        riderId = riderId
+                    )
+                )
+
+                println(response.code())
+
+            } catch (e: Exception) {
+                println(e)
+            }
         }
     }
 

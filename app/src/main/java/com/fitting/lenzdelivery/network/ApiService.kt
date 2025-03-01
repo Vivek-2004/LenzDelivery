@@ -7,6 +7,7 @@ import com.fitting.lenzdelivery.models.EditPhoneNumber
 import com.fitting.lenzdelivery.models.LogInRider
 import com.fitting.lenzdelivery.models.LogInRiderResponse
 import com.fitting.lenzdelivery.models.OtpCode
+import com.fitting.lenzdelivery.models.PatchCompleteTransit
 import com.fitting.lenzdelivery.models.RiderDetails
 import com.fitting.lenzdelivery.models.RiderOrder
 import com.fitting.lenzdelivery.models.VerifyAdminOtp
@@ -102,5 +103,19 @@ interface ApiService {
     suspend fun verifyAdminPickupOtp(
         @Path("orderKey") orderKey: String,
         @Body body: VerifyAdminPickupOtpReqBody
+    ): Response<ResponseBody>
+
+    @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
+    @POST("orders/{groupOrderId}/verify-delivery-otp")
+    suspend fun verifyShopDropOtp(
+        @Path("groupOrderId") groupOrderId: String,
+        @Body body: VerifyAdminPickupOtpReqBody
+    ): Response<ResponseBody>
+
+    @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
+    @PATCH("orders/{orderKey}/complete-transit")
+    suspend fun patchCompleteTransit(
+        @Path("orderKey") orderKey: String,
+        @Body riderId: PatchCompleteTransit
     ): Response<ResponseBody>
 }
