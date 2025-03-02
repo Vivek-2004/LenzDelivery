@@ -802,7 +802,7 @@ fun ShopAddressCardForDelivery(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (order.orders.isNotEmpty()) {
-                ExpandableOrderList(orders = order.orders) //vivek
+                ExpandableOrderList(orders = order.orders)
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -940,8 +940,14 @@ fun AdminAddressCard(order: RiderOrder) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    if (order.isPickupVerified || order.isDropVerified) Color.Green.copy(alpha = 0.3f)
-                    else Color.Unspecified
+                    if (
+                        (order.deliveryType == "pickup" && order.isDropVerified) ||
+                        (order.deliveryType == "delivery" && order.isPickupVerified)
+                    ) {
+                        Color.Green.copy(alpha = 0.3f)
+                    } else {
+                        Color.Unspecified
+                    }
                 )
                 .padding(16.dp)
         ) {
@@ -964,11 +970,18 @@ fun AdminAddressCard(order: RiderOrder) {
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Text(
-                    text = "LenZ",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Column {
+                    Text(
+                        text = "LenZ",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Injamul Mullick",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))

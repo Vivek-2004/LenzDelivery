@@ -18,10 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -60,7 +58,6 @@ fun EarningsScreen(
     navController: NavController
 ) {
     val riderState by deliveryViewModel.riderDetails.collectAsState()
-    val scrollState = rememberScrollState()
     val pullToRefreshState = rememberPullToRefreshState()
     var isRefreshing by remember { mutableStateOf(false) }
 
@@ -104,12 +101,11 @@ fun EarningsScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(horizontal = 16.dp, vertical = 12.dp)
-                                .verticalScroll(scrollState),
-                            verticalArrangement = Arrangement.spacedBy(24.dp),
+                                .padding(start = 16.dp, end = 16.dp, bottom = 25.dp),
+                            verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            EarningsCard(
+                            ValueInfoCard(
                                 title = "Total Orders",
                                 value = rider.totalOrders.toString(),
                                 dailyValue = rider.dailyOrders,
@@ -118,7 +114,7 @@ fun EarningsScreen(
                                 primaryColor = primaryGreen,
                                 cardBackground = cardBackground
                             )
-                            EarningsCard(
+                            ValueInfoCard(
                                 title = "Total Income",
                                 value = rider.totalEarnings.toString(),
                                 dailyValue = rider.dailyEarnings.toInt(),
@@ -127,46 +123,6 @@ fun EarningsScreen(
                                 primaryColor = primaryGreen,
                                 cardBackground = cardBackground
                             )
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                colors = CardDefaults.cardColors(containerColor = cardBackground),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = "Earning Summary",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.DarkGray
-                                    )
-
-                                    Spacer(modifier = Modifier.height(12.dp))
-
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        SummaryItem(
-                                            title = "Avg. Per Order",
-                                            value = "₹${if (rider.totalOrders > 0) (rider.totalEarnings / rider.totalOrders).toInt() else 0}"
-                                        )
-
-                                        SummaryItem(
-                                            title = "Today",
-                                            value = if (rider.dailyEarnings > 0.0) "₹${rider.dailyEarnings}" else "No earnings"
-                                        )
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(24.dp))
                         }
                     }
                 }
@@ -191,7 +147,7 @@ fun EarningsScreen(
 }
 
 @Composable
-fun EarningsCard(
+fun ValueInfoCard(
     title: String,
     value: String,
     dailyValue: Int,
@@ -308,30 +264,5 @@ fun EarningsCard(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun SummaryItem(
-    title: String,
-    value: String
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = Color.DarkGray
-        )
     }
 }

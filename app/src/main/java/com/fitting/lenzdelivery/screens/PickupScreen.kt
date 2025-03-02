@@ -6,19 +6,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowRight
@@ -59,11 +56,12 @@ fun PickupScreen(
     deliveryViewModel: DeliveryViewModel = viewModel(),
     navController: NavController,
 ) {
+    deliveryViewModel.getRiderOrders()
     val scrollState = rememberScrollState()
     val listState = rememberLazyListState()
     val scrollBarWidth = 5.dp
     val pullToRefreshState = rememberPullToRefreshState()
-    var isRefreshing by remember { mutableStateOf(false) }
+    var isRefreshing by remember { mutableStateOf(true) }
     var isAssigned by remember { mutableStateOf(false) }
 
     val riderState by deliveryViewModel.riderDetails.collectAsState()
@@ -116,7 +114,8 @@ fun PickupScreen(
                 modifier = Modifier.fillMaxSize(),
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .align(Alignment.Center),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -151,11 +150,11 @@ fun PickupScreen(
                     }
                 }
             }
-        }
-        else if (riderIncompleteOrder == null) {
+        } else if (riderIncompleteOrder == null) {
             if (allUnassignedOrders.isEmpty()) {
                 Column(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
                         .verticalScroll(scrollState),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -192,7 +191,6 @@ fun PickupScreen(
                                 else -> "LenZ Pickup"
                             },
                             earning = item.paymentAmount,
-                            bgColor = Color.White,
                             onCardClick = {
                                 navController.navigate(NavigationDestination.PickupDetails.name + "/${item.orderKey}")
                             },

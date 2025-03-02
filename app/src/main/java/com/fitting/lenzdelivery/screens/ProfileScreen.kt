@@ -64,6 +64,7 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun ProfileScreen(deliveryViewModel: DeliveryViewModel) {
+    deliveryViewModel.getRiderDetails()
     val context = LocalContext.current
     var errorMessage by remember { mutableStateOf("") }
     var showEditDialog by remember { mutableStateOf(false) }

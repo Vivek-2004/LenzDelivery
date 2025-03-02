@@ -134,7 +134,8 @@ fun MyApp(sharedPref: SharedPreferences) {
                 composable(route = NavigationDestination.PickupDetails.name + "/{orderKey}") { backStackEntry ->
                     PickupDetails(
                         deliveryViewModel = deliveryViewModelInstance,
-                        orderKey = backStackEntry.arguments?.getString("orderKey") ?: "",
+                        navController = navController,
+                        orderKey = backStackEntry.arguments?.getString("orderKey") ?: ""
                     )
                 }
             }
