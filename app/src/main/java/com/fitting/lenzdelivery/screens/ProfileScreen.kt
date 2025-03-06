@@ -1,8 +1,6 @@
 package com.fitting.lenzdelivery.screens
 
 import android.content.Intent
-import android.graphics.Color.parseColor
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -56,6 +54,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
+import androidx.core.net.toUri
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.R
 import kotlinx.coroutines.Dispatchers
@@ -90,7 +90,7 @@ fun ProfileScreen(deliveryViewModel: DeliveryViewModel) {
             else -> {
                 riderState?.let { rider ->
                     val buttonContainerColor = if (!rider.isWorking && rider.isAvailable) Color(
-                        parseColor("#38b000")
+                        "#38b000".toColorInt()
                     )
                     else if (rider.isWorking && !rider.isAvailable) Color.Gray
                     else Color.Red
@@ -159,7 +159,7 @@ fun ProfileScreen(deliveryViewModel: DeliveryViewModel) {
                             elevation = CardDefaults.cardElevation(16.dp),
                             border = BorderStroke(
                                 3.dp,
-                                Color(parseColor("#38b000")).copy(alpha = 0.4f)
+                                Color("#38b000".toColorInt()).copy(alpha = 0.4f)
                             )
                         ) {
                             Column(
@@ -332,7 +332,7 @@ fun ProfileScreen(deliveryViewModel: DeliveryViewModel) {
                                     IconButton(
                                         onClick = {
                                             val intent = Intent(Intent.ACTION_DIAL).apply {
-                                                data = Uri.parse("tel:+917496450124")
+                                                data = "tel:+917496450124".toUri()
                                             }
                                             context.startActivity(intent)
                                         }
@@ -356,7 +356,7 @@ fun ProfileScreen(deliveryViewModel: DeliveryViewModel) {
                                         onClick = {
                                             val intent = Intent(
                                                 Intent.ACTION_VIEW,
-                                                Uri.parse("https://wa.me/917496450124")
+                                                "https://wa.me/917496450124".toUri()
                                             )
                                             context.startActivity(intent)
                                         }
@@ -380,7 +380,7 @@ fun ProfileScreen(deliveryViewModel: DeliveryViewModel) {
                                     IconButton(
                                         onClick = {
                                             val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                                data = Uri.parse("mailto:service.lenz@gmail.com")
+                                                data = "mailto:service.lenz@gmail.com".toUri()
                                             }
                                             context.startActivity(intent)
                                         }

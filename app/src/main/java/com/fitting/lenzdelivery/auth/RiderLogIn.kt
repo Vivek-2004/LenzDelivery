@@ -96,22 +96,24 @@ fun RiderLogIn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
-                .padding(35.dp),
+                .padding(40.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                modifier = Modifier.size(200.dp),
+                modifier = Modifier.size(180.dp),
                 painter = painterResource(id = R.drawable.app_logo),
-                tint = Color.Black,
+                tint = Color.Unspecified,
                 contentDescription = "App Logo"
             )
 
+            Spacer(modifier = Modifier.height(20.dp))
+
             Text(
-                text = "Sign In to Continue",
-                fontSize = 17.sp,
-                modifier = Modifier.padding(bottom = 4.dp),
-                color = Color.Black
+                text = "Rider Sign In",
+                fontSize = 18.sp,
+                modifier = Modifier.padding(bottom = 6.dp),
+                fontWeight = FontWeight.Black
             )
 
             OutlinedTextField(

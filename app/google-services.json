@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "351492086746",
+    "project_id": "lenz-delivery",
+    "storage_bucket": "lenz-delivery.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:351492086746:android:a99fc49e097865714bfee3",
+        "android_client_info": {
+          "package_name": "com.fitting.lenzdelivery"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDS4mX7sqiRAebcZQA3tSHA4uTqTNsmYF4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

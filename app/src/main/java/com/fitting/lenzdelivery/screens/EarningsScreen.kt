@@ -1,6 +1,5 @@
 package com.fitting.lenzdelivery.screens
 
-import android.graphics.Color.parseColor
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -18,8 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,6 +46,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import androidx.navigation.NavController
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.R
@@ -58,10 +60,11 @@ fun EarningsScreen(
     navController: NavController
 ) {
     val riderState by deliveryViewModel.riderDetails.collectAsState()
+    val scrollState = rememberScrollState()
     val pullToRefreshState = rememberPullToRefreshState()
     var isRefreshing by remember { mutableStateOf(false) }
 
-    val primaryGreen = Color(parseColor("#38b000"))
+    val primaryGreen = Color("#38b000".toColorInt())
     val cardBackground = MaterialTheme.colorScheme.surface
 
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -101,6 +104,7 @@ fun EarningsScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
+                                .verticalScroll(scrollState)
                                 .padding(start = 16.dp, end = 16.dp, bottom = 25.dp),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally

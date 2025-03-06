@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.models.RiderOrder
@@ -534,7 +535,7 @@ fun LenzAddressCard() {
                     .height(48.dp),
                 onClick = {
                     val intent = Intent(Intent.ACTION_DIAL).apply {
-                        data = Uri.parse("tel:+918967310388")
+                        data = "tel:+918967310388".toUri()
                     }
                     context.startActivity(intent)
                 },
@@ -555,6 +556,8 @@ fun LenzAddressCard() {
                     style = MaterialTheme.typography.labelLarge
                 )
             }
+
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 }
