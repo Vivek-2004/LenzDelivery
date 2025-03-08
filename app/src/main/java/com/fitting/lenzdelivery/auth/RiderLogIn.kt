@@ -5,6 +5,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -36,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fitting.lenzdelivery.R
@@ -111,10 +113,22 @@ fun RiderLogIn(
 
             Text(
                 text = "Rider Sign In",
-                fontSize = 18.sp,
-                modifier = Modifier.padding(bottom = 6.dp),
-                fontWeight = FontWeight.Black
+                fontWeight = FontWeight.Bold,
+                fontSize = 28.sp,
+                textAlign = TextAlign.Center
             )
+
+//            Text(
+//                text = "Rider Sign In",
+//                fontSize = 18.sp,
+//                modifier = Modifier.padding(bottom = 6.dp),
+//                fontWeight = FontWeight.Black
+//            )
+
+//            Text(
+//                text = "or"
+//            )
+
 
             OutlinedTextField(
                 value = riderMail,
@@ -181,7 +195,16 @@ fun RiderLogIn(
                     }
                 )
             }
-            Spacer(modifier = Modifier.height(50.dp))
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            Text(
+                text = "Create an Account",
+                modifier = Modifier.clickable {
+
+                },
+                color = Color.Blue
+            )
         }
     }
 }
