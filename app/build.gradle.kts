@@ -12,10 +12,10 @@ android {
 
     defaultConfig {
         applicationId = "com.fitting.lenzdelivery"
-        minSdk = 25
+        minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.4"
+        versionCode = 5
+        versionName = "1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -52,10 +52,8 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.androidx.material.icons.extended)
-
-    implementation("io.socket:socket.io-client:2.1.0") {
-        exclude(group = "org.json", module = "json")
-    }
+    implementation(libs.socket.io.client)
+    implementation(libs.androidx.work.runtime.ktx)
 
     implementation(libs.play.app.update.ktx)
     implementation(libs.androidx.core.ktx)

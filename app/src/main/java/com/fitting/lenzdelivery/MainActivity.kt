@@ -1,16 +1,20 @@
 package com.fitting.lenzdelivery
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.RequiresApi
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.core.content.ContextCompat
 import com.fitting.lenzdelivery.auth.AuthScreen
 import com.fitting.lenzdelivery.navigation.MyApp
 import com.fitting.lenzdelivery.ui.theme.LenZDeliveryTheme
@@ -22,13 +26,23 @@ import com.google.android.play.core.ktx.isImmediateUpdateAllowed
 
 class MainActivity : ComponentActivity() {
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            startOrderNotificationService()
+        } else {
+            Toast.makeText(this, "Enable Notifications for better Experience", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private lateinit var appUpdateManager: AppUpdateManager
     private val updateType = AppUpdateType.IMMEDIATE
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        checkNotificationPermission()
 
         appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
         checkForUpdates()
@@ -86,5 +100,30 @@ class MainActivity : ComponentActivity() {
                 println("Something Went Wrong")
             }
         }
+    }
+
+    private fun checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED -> {
+                    startOrderNotificationService()
+                }
+
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+
+                else -> {
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        } else {
+            startOrderNotificationService()
+        }
+    }
+
+    private fun startOrderNotificationService() {
+        val serviceIntent = Intent(this, NotificationService::class.java)
+        startForegroundService(serviceIntent)
     }
 }

@@ -1,7 +1,6 @@
 package com.fitting.lenzdelivery
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -10,14 +9,12 @@ import com.fitting.lenzdelivery.models.AssignDeliveryReqBody
 import com.fitting.lenzdelivery.models.AssignPickupReqBody
 import com.fitting.lenzdelivery.models.ChangeWorkingStatus
 import com.fitting.lenzdelivery.models.EditPhoneNumber
-import com.fitting.lenzdelivery.models.GroupOrderData
 import com.fitting.lenzdelivery.models.OtpCode
 import com.fitting.lenzdelivery.models.PatchCompleteTransit
 import com.fitting.lenzdelivery.models.RiderDetails
 import com.fitting.lenzdelivery.models.RiderOrder
 import com.fitting.lenzdelivery.models.VerifyAdminOtp
 import com.fitting.lenzdelivery.models.VerifyAdminPickupOtpReqBody
-import com.fitting.lenzdelivery.network.WebSocketManager
 import com.fitting.lenzdelivery.network.deliveryService
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,15 +37,9 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
     var riderOrders by mutableStateOf<List<RiderOrder>>(emptyList())
         private set
 
-    //
-    private val _groupOrders = mutableStateListOf<GroupOrderData>()
-    val groupOrders: List<GroupOrderData> get() = _groupOrders
-    //
-
     init {
         getRiderDetails()
         getRiderOrders()
-//        connectSocket()
     }
 
     fun getRiderDetails() {
@@ -256,19 +247,5 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
                 println(e)
             }
         }
-    }
-
-    private fun connectSocket() {
-        WebSocketManager.connect()
-        viewModelScope.launch {
-            WebSocketManager.groupOrderFlow.collect { order ->
-                _groupOrders.add(order)
-            }
-        }
-    }
-
-    override fun onCleared() {
-        WebSocketManager.disconnect()
-        super.onCleared()
     }
 }
