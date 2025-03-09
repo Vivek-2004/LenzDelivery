@@ -103,6 +103,7 @@ class NotificationService : Service() {
     }
 
     private fun showNotification(message: String) {
+        println("Notification called")
         try {
             Log.d(TAG, "Showing notification with message: $message")
             val notificationManager =
@@ -129,7 +130,7 @@ class NotificationService : Service() {
             .setContentTitle("Order Listener Active")
             .setContentText("Listening for new orders...")
             .setSmallIcon(R.drawable.app_logo)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
             .setOngoing(true)
             .build()
     }
