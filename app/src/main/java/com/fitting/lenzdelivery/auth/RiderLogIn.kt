@@ -118,18 +118,6 @@ fun RiderLogIn(
                 textAlign = TextAlign.Center
             )
 
-//            Text(
-//                text = "Rider Sign In",
-//                fontSize = 18.sp,
-//                modifier = Modifier.padding(bottom = 6.dp),
-//                fontWeight = FontWeight.Black
-//            )
-
-//            Text(
-//                text = "or"
-//            )
-
-
             OutlinedTextField(
                 value = riderMail,
                 onValueChange = { riderMail = it },
@@ -201,7 +189,7 @@ fun RiderLogIn(
             Text(
                 text = "Create an Account",
                 modifier = Modifier.clickable {
-
+//                    RiderSignUp()
                 },
                 color = Color.Blue
             )

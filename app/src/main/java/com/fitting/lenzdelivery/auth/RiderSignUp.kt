@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.fitting.lenzdelivery.R
 
 @Composable
-fun RiderSignupScreen() {
+fun RiderSignUp() {
     var name by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
