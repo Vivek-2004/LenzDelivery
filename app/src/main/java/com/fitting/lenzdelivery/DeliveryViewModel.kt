@@ -16,7 +16,6 @@ import com.fitting.lenzdelivery.models.RiderOrder
 import com.fitting.lenzdelivery.models.VerifyAdminOtp
 import com.fitting.lenzdelivery.models.VerifyAdminPickupOtpReqBody
 import com.fitting.lenzdelivery.network.deliveryService
-import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,6 +39,16 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
     init {
         getRiderDetails()
         getRiderOrders()
+        observeNewOrders()
+    }
+
+    private fun observeNewOrders() {
+        viewModelScope.launch {
+            OrderEventBus.newOrders.collect { newOrder ->
+                riderOrders = (riderOrders + newOrder)
+                    .distinctBy { it.orderKey }
+            }
+        }
     }
 
     fun getRiderDetails() {
@@ -104,14 +113,10 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
         viewModelScope.launch {
             try {
                 val requestBody = AssignPickupReqBody(pickupRiderId = pickupRiderId)
-                // Convert to JSON
-                val jsonRequest = Gson().toJson(requestBody)
-                println("Request JSON: $jsonRequest") // Print the JSON before sending
-                val response = _deliveryService.assignPickupRider(
+                _deliveryService.assignPickupRider(
                     groupOrderId = groupOrderId,
                     pickupRiderId = requestBody
                 )
-                println(response)
             } catch (e: Exception) {
                 println(e)
             }
@@ -131,12 +136,6 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
                 val response = _deliveryService.assignDeliveryRider(
                     deliveryReqBody = reqBody
                 )
-
-                if (response.isSuccessful) {
-                    println("success" + response.body())
-                } else {
-                    println("unsuccess" + response.body())
-                }
             } catch (e: HttpException) {
                 println(e)
             }
@@ -240,8 +239,6 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
                         riderId = riderId
                     )
                 )
-
-                println(response.code())
 
             } catch (e: Exception) {
                 println(e)

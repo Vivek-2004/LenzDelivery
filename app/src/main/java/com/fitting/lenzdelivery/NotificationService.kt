@@ -9,15 +9,22 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.fitting.lenzdelivery.models.RiderOrder
+import com.google.gson.Gson
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.net.URISyntaxException
 
 class NotificationService : Service() {
 
     private lateinit var socket: Socket
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val TAG = "OrderNotificationService"
 
     override fun onCreate() {
@@ -80,31 +87,26 @@ class NotificationService : Service() {
     }
 
     private val onNewGroupOrder = Emitter.Listener { args ->
-        Log.d(TAG, "newGroupOrder event received with args: ${args.contentToString()}")
-
         try {
-            if (args.isNotEmpty() && args[0] != null) {
-                val data = args[0] as JSONObject
-                Log.d(TAG, "Received data: $data")
-
-                val orderMessage = data.optString("message", "New order received!")
-                Log.d(TAG, "Order message: $orderMessage")
-
-                // Show notification on the main thread
-                showNotification(orderMessage)
-            } else {
-                Log.w(TAG, "Received empty newGroupOrder event")
+            val data = args[0] as JSONObject
+            val orderMessage = data.optString("message", "New order received!")
+            showNotification(orderMessage)
+            val riderOrder =
+                Gson().fromJson(data.getJSONObject("data").toString(), RiderOrder::class.java)
+            serviceScope.launch {
+                OrderEventBus.emitNewOrder(riderOrder)
             }
+
         } catch (e: Exception) {
-            Log.e(TAG, "Error processing newGroupOrder event: ${e.message}")
-            e.printStackTrace()
+            Log.e(TAG, "Error parsing order: ${e.message}")
         }
     }
 
     private fun showNotification(message: String) {
         try {
             Log.d(TAG, "Showing notification with message: $message")
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setContentTitle("New Order Alert")
                 .setContentText(message)

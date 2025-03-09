@@ -32,7 +32,8 @@ class MainActivity : ComponentActivity() {
         if (isGranted) {
             startOrderNotificationService()
         } else {
-            Toast.makeText(this, "Enable Notifications for better Experience", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Enable Notifications for better Experience", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
@@ -105,7 +106,10 @@ class MainActivity : ComponentActivity() {
     private fun checkNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             when {
-                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED -> {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED -> {
                     startOrderNotificationService()
                 }
 
