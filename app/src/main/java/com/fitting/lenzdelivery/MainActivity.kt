@@ -11,7 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import com.fitting.lenzdelivery.auth.RiderLogIn
+import com.fitting.lenzdelivery.auth.AuthScreen
 import com.fitting.lenzdelivery.navigation.MyApp
 import com.fitting.lenzdelivery.ui.theme.LenZDeliveryTheme
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
                 if (isLoggedIn) {
                     MyApp(sharedPref = sharedPref)
                 } else {
-                    RiderLogIn(
+                    AuthScreen(
                         sharedPref = sharedPref,
                         prefEditor = prefEditor
                     )

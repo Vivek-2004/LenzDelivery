@@ -1,6 +1,7 @@
 package com.fitting.lenzdelivery.auth
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -42,10 +43,13 @@ import androidx.compose.ui.unit.sp
 import com.fitting.lenzdelivery.R
 
 @Composable
-fun RiderSignUp() {
+fun RiderSignUp(
+    onNavigateToLogin: () -> Unit
+) {
     var name by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var adminAuth by remember { mutableStateOf("") }
     var vehicleNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -61,7 +65,7 @@ fun RiderSignUp() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(20.dp)
     ) {
         Column(
             modifier = Modifier
@@ -69,14 +73,12 @@ fun RiderSignUp() {
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(35.dp))
 
-            // Rider Image and Title
             Image(
                 painter = painterResource(id = R.drawable.app_logo),
                 contentDescription = "App Logo",
-                modifier = Modifier
-                    .size(140.dp)
+                modifier = Modifier.size(140.dp)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -162,7 +164,18 @@ fun RiderSignUp() {
                 }
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = adminAuth,
+                onValueChange = { adminAuth = it },
+                label = { Text("Auth Key") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = textFieldColors
+            )
+
+            Spacer(modifier = Modifier.height(30.dp))
 
             // Sign Up Button
             Button(
@@ -179,7 +192,17 @@ fun RiderSignUp() {
                 )
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(25.dp))
+
+            Text(
+                text = "Have an account? Sign In",
+                modifier = Modifier.clickable {
+                    onNavigateToLogin()
+                },
+                color = Color.Blue
+            )
+
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 }

@@ -53,7 +53,8 @@ import kotlinx.coroutines.withContext
 @Composable
 fun RiderLogIn(
     sharedPref: SharedPreferences,
-    prefEditor: SharedPreferences.Editor
+    prefEditor: SharedPreferences.Editor,
+    onNavigateToSignUp: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -189,7 +190,7 @@ fun RiderLogIn(
             Text(
                 text = "Create an Account",
                 modifier = Modifier.clickable {
-//                    RiderSignUp()
+                    onNavigateToSignUp()
                 },
                 color = Color.Blue
             )
