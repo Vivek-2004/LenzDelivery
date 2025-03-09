@@ -1,8 +1,6 @@
 package com.fitting.lenzdelivery.navigation
 
 import android.content.SharedPreferences
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -40,7 +38,6 @@ import com.fitting.lenzdelivery.screens.ProfileScreen
 import com.fitting.lenzdelivery.screens.component_holders.PaymentsHistory
 import com.fitting.lenzdelivery.screens.component_holders.PickupDetails
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MyApp(sharedPref: SharedPreferences) {
     val riderId: String? = sharedPref.getString("riderId", "")

@@ -2,15 +2,6 @@ package com.fitting.lenzdelivery.models
 
 import com.google.gson.annotations.SerializedName
 
-//
-data class GroupOrderData(
-    val id: String,
-    val userId: String,
-    val totalAmount: Double,
-    val paymentStatus: String
-)
-//
-
 data class RiderDetails(
     val _id: String,
     val riderId: String,

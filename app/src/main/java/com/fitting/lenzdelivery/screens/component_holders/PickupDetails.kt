@@ -1,9 +1,6 @@
 package com.fitting.lenzdelivery.screens.component_holders
 
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,7 +48,6 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PickupDetails(
     orderKey: String,
@@ -416,7 +412,7 @@ fun ShopDetailCard(
                     .height(48.dp),
                 onClick = {
                     val intent = Intent(Intent.ACTION_DIAL).apply {
-                        data = Uri.parse("tel:$phone")
+                        data = "tel:$phone".toUri()
                     }
                     context.startActivity(intent)
                 },

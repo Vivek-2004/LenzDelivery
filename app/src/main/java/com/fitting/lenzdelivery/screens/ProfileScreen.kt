@@ -287,9 +287,7 @@ fun ProfileScreen(deliveryViewModel: DeliveryViewModel) {
                             if (isLoading) {
                                 CircularProgressIndicator(color = Color.Black)
                             } else {
-                                Column(
-
-                                ) {
+                                Column {
                                     Text(
                                         text = if (rider.isWorking) "PORT OUT" else "PORT IN",
                                         fontWeight = FontWeight.Bold,

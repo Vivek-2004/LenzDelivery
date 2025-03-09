@@ -1,7 +1,5 @@
 package com.fitting.lenzdelivery.screens.component_holders
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -39,13 +37,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.R
 import com.fitting.lenzdelivery.formDate
@@ -55,7 +53,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentsHistory(
@@ -77,15 +74,8 @@ fun PaymentsHistory(
         }
     }
 
-    // Theme colors
-    val primaryGreen = Color(android.graphics.Color.parseColor("#38b000"))
-    val backgroundGradient = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFFF8F9FA),
-            Color(0xFFE9ECEF)
-        )
-    )
 
+    val primaryGreen = Color("#38b000".toColorInt())
     val scrollBarWidth = 4.dp
     val listState = rememberLazyListState()
     val pullToRefreshState = rememberPullToRefreshState()

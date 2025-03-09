@@ -1,7 +1,5 @@
 package com.fitting.lenzdelivery.screens
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,7 +47,6 @@ import com.fitting.lenzdelivery.screens.component_holders.details.TransitOrderDe
 import com.fitting.lenzdelivery.screens.components.PickupItem
 import kotlinx.coroutines.delay
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PickupScreen(

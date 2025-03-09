@@ -6,9 +6,11 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import com.fitting.lenzdelivery.models.RiderOrder
 import com.google.gson.Gson
 import io.socket.client.IO
@@ -25,11 +27,10 @@ class NotificationService : Service() {
 
     private lateinit var socket: Socket
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val TAG = "OrderNotificationService"
+    private val TAG = "VivekGhosh"
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "Service onCreate called")
         createNotificationChannel()
 
         // Start foreground notification immediately to avoid ANR
@@ -37,7 +38,6 @@ class NotificationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(TAG, "Service onStartCommand called")
 
         // Setup socket in onStartCommand to avoid blocking onCreate
         setupSocket()
@@ -97,15 +97,14 @@ class NotificationService : Service() {
                 OrderEventBus.emitNewOrder(riderOrder)
             }
 
-        } catch (e: Exception) {
-            Log.e(TAG, "Error parsing order: ${e.message}")
+        } catch (_: Exception) {
         }
     }
 
     private fun showNotification(message: String) {
-        println("Notification called")
         try {
-            Log.d(TAG, "Showing notification with message: $message")
+            val soundUri = ("android.resource://" + packageName + "/" + R.raw.vivek).toUri()
+
             val notificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
@@ -114,13 +113,14 @@ class NotificationService : Service() {
                 .setSmallIcon(R.drawable.app_logo)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
+                .setSound(soundUri)
                 .build()
 
             val notificationId = System.currentTimeMillis().toInt()
             notificationManager.notify(notificationId, notification)
-            Log.d(TAG, "Notification shown with ID: $notificationId")
+            println("Notification shown with ID: $notificationId")
         } catch (e: Exception) {
-            Log.e(TAG, "Error showing notification: ${e.message}")
+            println("Error showing notification: ${e.message}")
             e.printStackTrace()
         }
     }
@@ -137,7 +137,8 @@ class NotificationService : Service() {
 
     private fun createNotificationChannel() {
         try {
-            Log.d(TAG, "Creating notification channel")
+            val soundUri = ("android.resource://" + packageName + "/" + R.raw.vivek).toUri()
+
             val channel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
                 "Order Notifications",
@@ -146,13 +147,19 @@ class NotificationService : Service() {
                 description = "Notifications for new order alerts"
                 enableVibration(true)
                 enableLights(true)
+                setSound(
+                    soundUri, AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
             }
 
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
-            Log.d(TAG, "Notification channel created successfully")
+            println("Notification channel created successfully")
         } catch (e: Exception) {
-            Log.e(TAG, "Error creating notification channel: ${e.message}")
+            println("Error creating notification channel: ${e.message}")
             e.printStackTrace()
         }
     }

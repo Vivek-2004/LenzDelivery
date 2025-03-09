@@ -1,10 +1,7 @@
 package com.fitting.lenzdelivery.screens.component_holders.details
 
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -69,6 +66,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.models.GroupOrders
 import com.fitting.lenzdelivery.models.GroupedOrders
@@ -83,7 +81,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TransitOrderDetails(
     order: RiderOrder,
@@ -257,7 +254,7 @@ fun TransitOrderDetails(
             isDropVerified = order.isDropVerified,
             onContactHelp = {
                 val intent = Intent(Intent.ACTION_DIAL).apply {
-                    data = Uri.parse("tel:+918967310388")
+                    data = "tel:+918967310388".toUri()
                 }
                 context.startActivity(intent)
             },
@@ -670,7 +667,7 @@ fun ShopAddressCard(
                     .height(48.dp),
                 onClick = {
                     val intent = Intent(Intent.ACTION_DIAL).apply {
-                        data = Uri.parse("tel:$phone")
+                        data = "tel:$phone".toUri()
                     }
                     context.startActivity(intent)
                 },
@@ -813,7 +810,7 @@ fun ShopAddressCardForDelivery(
                     .height(48.dp),
                 onClick = {
                     val intent = Intent(Intent.ACTION_DIAL).apply {
-                        data = Uri.parse("tel:${order.phone}")
+                        data = "tel:${order.phone}".toUri()
                     }
                     context.startActivity(intent)
                 },
@@ -1033,7 +1030,7 @@ fun AdminAddressCard(order: RiderOrder) {
                     .height(48.dp),
                 onClick = {
                     val intent = Intent(Intent.ACTION_DIAL).apply {
-                        data = Uri.parse("tel:+918967310388")
+                        data = "tel:+918967310388".toUri()
                     }
                     context.startActivity(intent)
                 },

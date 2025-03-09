@@ -42,7 +42,6 @@ fun PickupItem(
     onCardClick: () -> Unit,
     onAssignSwipe: () -> Unit
 ) {
-    // Aristocratic color palette
     val goldAccent = Color(0xFFD4AF37)
     val cream = Color(0xFFF5F5F0)
     val charcoal = Color(0xFF363636)

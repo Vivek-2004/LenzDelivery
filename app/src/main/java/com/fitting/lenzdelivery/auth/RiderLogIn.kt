@@ -1,9 +1,7 @@
 package com.fitting.lenzdelivery.auth
 
 import android.content.SharedPreferences
-import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,7 +47,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RiderLogIn(
     sharedPref: SharedPreferences,
