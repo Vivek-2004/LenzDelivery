@@ -90,6 +90,8 @@ fun RiderSignUp(
                 textAlign = TextAlign.Center
             )
 
+            Text("Page Under Construction!", color = Color.Red)
+
             Spacer(modifier = Modifier.height(32.dp))
 
             // Name Field
@@ -179,7 +181,9 @@ fun RiderSignUp(
 
             // Sign Up Button
             Button(
-                onClick = { /* Handle signup */ },
+                onClick = {
+                    onNavigateToLogin()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

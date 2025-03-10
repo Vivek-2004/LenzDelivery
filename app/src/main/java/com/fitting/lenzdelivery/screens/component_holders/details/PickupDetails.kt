@@ -1,4 +1,4 @@
-package com.fitting.lenzdelivery.screens.component_holders
+package com.fitting.lenzdelivery.screens.component_holders.details
 
 import android.content.Intent
 import androidx.compose.foundation.background
@@ -43,7 +43,7 @@ import androidx.navigation.NavController
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.models.RiderOrder
 import com.fitting.lenzdelivery.models.ShopAddress
-import com.fitting.lenzdelivery.screens.component_holders.details.AddressSeparator
+import com.fitting.lenzdelivery.screens.component_holders.SwipeToButton
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -63,115 +63,119 @@ fun PickupDetails(
     val createdAtInstant = Instant.parse(order.createdAt)
     val formattedDate = dateFormatter.format(createdAtInstant)
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(12.dp)
+    if (order.riderId != null) {
+        navController.popBackStack()
+    } else {
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(12.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "ID: ${order.orderKey}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
                     )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = "ID: ${order.orderKey}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Unassigned",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Schedule,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = formattedDate,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Earnings Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Unassigned",
-                            style = MaterialTheme.typography.titleLarge,
+                            text = "Estimated Earning",
                             fontWeight = FontWeight.Bold
                         )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Schedule,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = formattedDate,
-                            style = MaterialTheme.typography.bodyMedium
+                            text = "₹${order.paymentAmount}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF008000)
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LocationDetailsSection(order = order)
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Earnings Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Estimated Earning",
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "₹${order.paymentAmount}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF008000)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LocationDetailsSection(order = order)
-
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
-        ) {
-            SwipeToButton(
-                onSwipeComplete = {
-                    if (order.deliveryType == "pickup") {
-                        deliveryViewModel.assignPickupRider(
-                            groupOrderId = order.groupOrderIds.first().groupOrderId
-                        )
-                    } else {
-                        deliveryViewModel.assignDeliveryRider(
-                            pickupKey = order.orderKey
-                        )
+                SwipeToButton(
+                    onSwipeComplete = {
+                        if (order.deliveryType == "pickup") {
+                            deliveryViewModel.assignPickupRider(
+                                groupOrderId = order.groupOrderIds.first().groupOrderId
+                            )
+                        } else {
+                            deliveryViewModel.assignDeliveryRider(
+                                pickupKey = order.orderKey
+                            )
+                        }
+                        navController.popBackStack()
                     }
-                    navController.popBackStack()
-                }
-            )
+                )
+            }
         }
     }
 }

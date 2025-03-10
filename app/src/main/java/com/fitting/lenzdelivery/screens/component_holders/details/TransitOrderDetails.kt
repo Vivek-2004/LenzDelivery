@@ -86,7 +86,6 @@ fun TransitOrderDetails(
     order: RiderOrder,
     deliveryViewModel: DeliveryViewModel
 ) {
-    println(order)
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val dateFormatter = DateTimeFormatter

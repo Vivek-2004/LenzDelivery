@@ -36,7 +36,7 @@ import com.fitting.lenzdelivery.screens.EarningsScreen
 import com.fitting.lenzdelivery.screens.PickupScreen
 import com.fitting.lenzdelivery.screens.ProfileScreen
 import com.fitting.lenzdelivery.screens.component_holders.PaymentsHistory
-import com.fitting.lenzdelivery.screens.component_holders.PickupDetails
+import com.fitting.lenzdelivery.screens.component_holders.details.PickupDetails
 
 @Composable
 fun MyApp(sharedPref: SharedPreferences) {

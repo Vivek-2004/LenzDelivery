@@ -45,8 +45,12 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
     private fun observeNewOrders() {
         viewModelScope.launch {
             OrderEventBus.newOrders.collect { newOrder ->
-                riderOrders = (riderOrders + newOrder)
-                    .distinctBy { it.orderKey }
+                if (newOrder.riderId == null) {
+                    riderOrders = (riderOrders + newOrder)
+                        .distinctBy { it.orderKey }
+                } else {
+                    getRiderOrders()
+                }
             }
         }
     }

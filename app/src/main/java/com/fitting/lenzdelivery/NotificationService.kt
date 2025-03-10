@@ -90,13 +90,14 @@ class NotificationService : Service() {
         try {
             val data = args[0] as JSONObject
             val orderMessage = data.optString("message", "New order received!")
-            showNotification(orderMessage)
             val riderOrder =
                 Gson().fromJson(data.getJSONObject("data").toString(), RiderOrder::class.java)
+            if (riderOrder.riderId == null) {
+                showNotification(orderMessage)
+            }
             serviceScope.launch {
                 OrderEventBus.emitNewOrder(riderOrder)
             }
-
         } catch (_: Exception) {
         }
     }
