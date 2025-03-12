@@ -3,6 +3,7 @@ package com.fitting.lenzdelivery
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -111,6 +112,14 @@ class NotificationService : Service() {
         try {
             val soundUri = ("android.resource://" + packageName + "/" + R.raw.vivek).toUri()
 
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+
+            val pendingIntent = PendingIntent.getActivity(
+                this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
             val notificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
@@ -120,6 +129,7 @@ class NotificationService : Service() {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .setSound(soundUri)
+                .setContentIntent(pendingIntent)
                 .build()
 
             val notificationId = System.currentTimeMillis().toInt()
@@ -132,12 +142,21 @@ class NotificationService : Service() {
     }
 
     private fun createForegroundNotification(): Notification {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setContentTitle("Order Listener Active")
-            .setContentText("Listening for new orders...")
+            .setContentText("Checking for New Orders...")
             .setSmallIcon(R.drawable.app_logo)
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .setOngoing(true)
+            .setContentIntent(pendingIntent)
             .build()
     }
 
