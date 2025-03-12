@@ -25,6 +25,11 @@ import java.net.URISyntaxException
 
 class NotificationService : Service() {
 
+    companion object {
+        private const val NOTIFICATION_CHANNEL_ID = "OrderNotifications"
+        private const val FOREGROUND_NOTIFICATION_ID = 1
+    }
+
     private lateinit var socket: Socket
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val TAG = "VivekGhosh"
@@ -173,10 +178,5 @@ class NotificationService : Service() {
             socket.disconnect()
         }
         super.onDestroy()
-    }
-
-    companion object {
-        private const val NOTIFICATION_CHANNEL_ID = "OrderNotifications"
-        private const val FOREGROUND_NOTIFICATION_ID = 1
     }
 }

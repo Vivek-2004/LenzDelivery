@@ -76,6 +76,16 @@ data class LogInRider(
     val password: String
 )
 
+data class SignUpRider(
+    val name: String,
+    val phone: String,
+    val email: String,
+    val password: String,
+    val vehicleNumber: String,
+    val adminId: String,
+    val adminAuth: String
+)
+
 data class LogInRiderResponse(
     val message: String,
     val riderId: String,

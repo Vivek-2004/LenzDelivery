@@ -155,7 +155,7 @@ fun RiderLogIn(
                                 isLoading = true
                                 try {
                                     withContext(Dispatchers.IO) {
-                                        val response = deliveryService.logInRider(
+                                        val response = deliveryService.riderLogIn(
                                             loginBody = LogInRider(
                                                 riderEmail = riderMail,
                                                 password = password

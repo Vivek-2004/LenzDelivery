@@ -10,6 +10,7 @@ import com.fitting.lenzdelivery.models.OtpCode
 import com.fitting.lenzdelivery.models.PatchCompleteTransit
 import com.fitting.lenzdelivery.models.RiderDetails
 import com.fitting.lenzdelivery.models.RiderOrder
+import com.fitting.lenzdelivery.models.SignUpRider
 import com.fitting.lenzdelivery.models.VerifyAdminOtp
 import com.fitting.lenzdelivery.models.VerifyAdminPickupOtpReqBody
 import okhttp3.OkHttpClient
@@ -67,9 +68,15 @@ interface ApiService {
 
     @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
     @POST("riders/login")
-    suspend fun logInRider(
+    suspend fun riderLogIn(
         @Body loginBody: LogInRider
     ): LogInRiderResponse
+
+    @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
+    @POST("riders/signup")
+    suspend fun riderSignUp(
+        @Body signupBody: SignUpRider
+    ): Response<ResponseBody>
 
     @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
     @PATCH("orders/{groupOrderId}/accept-pickup")
