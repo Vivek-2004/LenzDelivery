@@ -43,7 +43,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -96,6 +98,7 @@ fun TransitOrderDetails(
     val formattedDate = dateFormatter.format(createdAtInstant)
     val scrollState = rememberScrollState()
 
+    var isLoading by remember { mutableStateOf(false) }
     var showOtpDialog by remember { mutableStateOf(false) }
     var enteredOtp by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -105,6 +108,7 @@ fun TransitOrderDetails(
 
     LaunchedEffect(verifyOtp) {
         if (!verifyOtp) return@LaunchedEffect
+        isLoading = true
         try {
             if (order.deliveryType == "pickup") {
                 if (!order.isPickupVerified) { // Shop Pickup
@@ -144,6 +148,7 @@ fun TransitOrderDetails(
     }
 
     if (otpVerifyToast.isNotEmpty()) {
+        isLoading = false
         Toast.makeText(context, otpVerifyToast, Toast.LENGTH_SHORT).show()
         otpVerifyToast = ""
     }
@@ -175,7 +180,7 @@ fun TransitOrderDetails(
     ) {
         // Status Header - Enhanced with animated gradients for visual appeal
         OrderStatusHeader(
-            isCompleted = order.isCompleted,
+            order = order,
             formattedDate = formattedDate
         )
 
@@ -212,6 +217,7 @@ fun TransitOrderDetails(
         } else {
             if (order.deliveryType == "delivery" && !order.isPickupVerified) {
                 Button(
+                    enabled = !isLoading,
                     onClick = { showOtpDialog = true },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -222,23 +228,31 @@ fun TransitOrderDetails(
                         .fillMaxWidth()
                         .padding(20.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Pin,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Pickup OTP",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontSize = 18.sp
-                    )
+                    if (isLoading) {
+                        LinearProgressIndicator(
+                            color = Color.DarkGray,
+                            gapSize = 4.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Pin,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Pickup OTP",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontSize = 18.sp
+                        )
+                    }
                 }
             } else {
                 Spacer(modifier = Modifier.height(16.dp))
                 GroupOrderSection(
                     groupOrderIds = order.groupOrderIds,
                     isPickupVerified = order.isPickupVerified,
+                    isLoading = isLoading,
                     onVerifyOtp = { groupId ->
                         currentGroupOrderId = groupId  // Store the selected ID
                         showOtpDialog = true
@@ -253,7 +267,7 @@ fun TransitOrderDetails(
             isDropVerified = order.isDropVerified,
             onContactHelp = {
                 val intent = Intent(Intent.ACTION_DIAL).apply {
-                    data = "tel:+918967310388".toUri()
+                    data = "tel:+918584932580".toUri()
                 }
                 context.startActivity(intent)
             },
@@ -353,15 +367,15 @@ fun OtpVerificationDialog(
 
 @Composable
 fun OrderStatusHeader(
-    isCompleted: Boolean,
+    order: RiderOrder,
     formattedDate: String
 ) {
-    val primaryColor = if (isCompleted)
+    val primaryColor = if (order.isPickupVerified && order.isDropVerified)
         MaterialTheme.colorScheme.primary
     else
         MaterialTheme.colorScheme.secondary
 
-    val containerColor = if (isCompleted)
+    val containerColor = if (order.isPickupVerified && order.isDropVerified)
         MaterialTheme.colorScheme.primaryContainer
     else
         MaterialTheme.colorScheme.secondaryContainer
@@ -384,11 +398,11 @@ fun OrderStatusHeader(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (isCompleted)
+                    imageVector = if (order.isPickupVerified && order.isDropVerified)
                         Icons.Default.CheckCircle
                     else
                         Icons.Default.LocalShipping,
-                    contentDescription = if (isCompleted) "Completed" else "In Transit",
+                    contentDescription = if (order.isPickupVerified && order.isDropVerified) "Dropped" else "In Transit",
                     tint = Color.White,
                     modifier = Modifier.size(32.dp)
                 )
@@ -397,10 +411,19 @@ fun OrderStatusHeader(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = if (isCompleted) "Completed" else "In Transit",
+                text = if (order.isPickupVerified && order.isDropVerified) "Dropped" else "In Transit",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = primaryColor
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Order #${order.orderKey}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Bold
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -1029,7 +1052,7 @@ fun AdminAddressCard(order: RiderOrder) {
                     .height(48.dp),
                 onClick = {
                     val intent = Intent(Intent.ACTION_DIAL).apply {
-                        data = "tel:+918967310388".toUri()
+                        data = "tel:+918584932580".toUri()
                     }
                     context.startActivity(intent)
                 },
@@ -1070,7 +1093,8 @@ fun AddressSeparator() {
 fun GroupOrderSection(
     groupOrderIds: List<GroupOrders>,
     isPickupVerified: Boolean,
-    onVerifyOtp: (String) -> Unit
+    onVerifyOtp: (String) -> Unit,
+    isLoading: Boolean
 ) {
     Section(
         title = "Group Order (${groupOrderIds.size})",
@@ -1131,7 +1155,7 @@ fun GroupOrderSection(
                             }
                         }
                         Button(
-                            enabled = groupOrder.trackingStatus != "Order Completed",
+                            enabled = !isLoading && groupOrder.trackingStatus != "Order Completed",
                             onClick = { onVerifyOtp(groupOrder.groupOrderId) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (isPickupVerified)
@@ -1146,23 +1170,31 @@ fun GroupOrderSection(
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.height(36.dp)
                         ) {
-                            if (groupOrder.trackingStatus == "Order Completed") {
-                                Text(
-                                    text = "Verified",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = Color(0xFF008000)
+                            if (isLoading) {
+                                LinearProgressIndicator(
+                                    modifier = Modifier.width(70.dp),
+                                    color = Color.DarkGray,
+                                    gapSize = 4.dp
                                 )
                             } else {
-                                Icon(
-                                    imageVector = Icons.Default.Pin,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = if (isPickupVerified) "Drop OTP" else "Pickup OTP",
-                                    style = MaterialTheme.typography.labelMedium
-                                )
+                                if (groupOrder.trackingStatus == "Order Completed") {
+                                    Text(
+                                        text = "Verified",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = Color(0xFF008000)
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.Pin,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = if (isPickupVerified) "Drop OTP" else "Pickup OTP",
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
                             }
                         }
                     }
@@ -1217,6 +1249,7 @@ fun ActionButtons(
     onContactHelp: () -> Unit,
     onCompleteTransit: () -> Unit
 ) {
+    var isTransitClicked by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1253,11 +1286,14 @@ fun ActionButtons(
 
         // Complete Transit Button
         Button(
-            onClick = onCompleteTransit,
+            onClick = {
+                onCompleteTransit()
+                isTransitClicked = true
+            },
             modifier = Modifier
                 .weight(1f)
                 .height(55.dp),
-            enabled = isPickupVerified && isDropVerified,
+            enabled = isPickupVerified && isDropVerified && !isTransitClicked,
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (isPickupVerified && isDropVerified)
@@ -1274,15 +1310,22 @@ fun ActionButtons(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.DoneAll,
-                    contentDescription = "Complete Transit",
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Complete Transit",
-                )
+                if (isTransitClicked) {
+                    CircularProgressIndicator(
+                        color = Color.DarkGray,
+                        strokeWidth = 4.dp
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.DoneAll,
+                        contentDescription = "Complete Transit",
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Complete Transit",
+                    )
+                }
             }
         }
     }

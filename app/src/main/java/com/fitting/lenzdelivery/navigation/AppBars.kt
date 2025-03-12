@@ -111,14 +111,16 @@ fun BottomNavigationBar(
     )
 
     Column(modifier = Modifier.wrapContentSize()) {
-        HorizontalDivider(thickness = 2.dp)
+        HorizontalDivider(thickness = 2.dp, color = Color.Gray)
 
         NavigationBar(
             modifier = Modifier
                 .navigationBarsPadding()
-                .height(80.dp)
+                .height(80.dp),
+            containerColor = Color.DarkGray
         ) {
             items.forEach { screen ->
+                val selected = currentDestination?.route == screen
 
                 val icon = when (screen) {
                     NavigationDestination.Pickups.name -> ImageVector.vectorResource(R.drawable.pickup)
@@ -128,11 +130,11 @@ fun BottomNavigationBar(
                 }
 
                 NavigationBarItem(
-                    selected = currentDestination?.route == screen,
+                    selected = selected,
                     interactionSource = remember { MutableInteractionSource() },
                     icon = {
                         Icon(
-                            modifier = Modifier.size(28.dp),
+                            modifier = if (selected) Modifier.size(30.dp) else Modifier.size(25.dp),
                             imageVector = icon,
                             contentDescription = screen,
                             tint = Color.Unspecified
@@ -141,8 +143,9 @@ fun BottomNavigationBar(
                     label = {
                         Text(
                             text = screen,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
+                            fontSize = if (selected) 16.sp else 13.5.sp,
+                            fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Bold,
+                            color = if (selected) Color.White else Color.LightGray
                         )
                     },
                     onClick = {
@@ -160,7 +163,7 @@ fun BottomNavigationBar(
                         unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         selectedTextColor = MaterialTheme.colorScheme.primary,
                         unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        indicatorColor = Color.Gray.copy(alpha = 0.6f),
+                        indicatorColor = Color.LightGray.copy(alpha = 0.7f),
                     )
                 )
             }

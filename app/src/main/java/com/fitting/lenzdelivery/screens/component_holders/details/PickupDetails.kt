@@ -535,7 +535,7 @@ fun LenzAddressCard() {
                     .height(48.dp),
                 onClick = {
                     val intent = Intent(Intent.ACTION_DIAL).apply {
-                        data = "tel:+918967310388".toUri()
+                        data = "tel:+918584932580".toUri()
                     }
                     context.startActivity(intent)
                 },

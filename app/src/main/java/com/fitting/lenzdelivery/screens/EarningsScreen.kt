@@ -56,9 +56,9 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EarningsScreen(
-    deliveryViewModel: DeliveryViewModel,
-    navController: NavController
+    deliveryViewModel: DeliveryViewModel, navController: NavController
 ) {
+    deliveryViewModel.getRiderDetails()
     val riderState by deliveryViewModel.riderDetails.collectAsState()
     val scrollState = rememberScrollState()
     val pullToRefreshState = rememberPullToRefreshState()
@@ -71,12 +71,10 @@ fun EarningsScreen(
         when {
             riderState == null -> {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(
-                        color = primaryGreen,
-                        strokeWidth = 4.dp
+                        color = primaryGreen, strokeWidth = 4.dp
                     )
                 }
             }
@@ -94,12 +92,9 @@ fun EarningsScreen(
                     }
 
                     PullToRefreshBox(
-                        state = pullToRefreshState,
-                        isRefreshing = isRefreshing,
-                        onRefresh = {
+                        state = pullToRefreshState, isRefreshing = isRefreshing, onRefresh = {
                             isRefreshing = true
-                        },
-                        modifier = Modifier.fillMaxSize()
+                        }, modifier = Modifier.fillMaxSize()
                     ) {
                         Column(
                             modifier = Modifier

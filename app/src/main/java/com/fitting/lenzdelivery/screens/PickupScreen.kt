@@ -104,7 +104,7 @@ fun PickupScreen(
         onRefresh = { isRefreshing = true },
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White.copy(alpha = 0.09f))
+            .background(Color.Gray.copy(alpha = 0.6f))
     ) {
         if (!riderIsWorking) {
             Box(
