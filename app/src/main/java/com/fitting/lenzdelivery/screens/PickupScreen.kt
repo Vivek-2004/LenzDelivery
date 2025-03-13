@@ -209,7 +209,7 @@ fun PickupScreen(
             }
         } else {
             TransitOrderDetails(
-                order = riderIncompleteOrder,
+                riderOrder = riderIncompleteOrder,
                 deliveryViewModel = deliveryViewModel
             )
         }

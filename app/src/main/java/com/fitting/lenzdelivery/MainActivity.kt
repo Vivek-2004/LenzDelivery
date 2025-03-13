@@ -67,7 +67,10 @@ class MainActivity : ComponentActivity() {
             }
             LenZDeliveryTheme(darkTheme = false) {
                 if (isLoggedIn) {
-                    MyApp(sharedPref = sharedPref)
+                    MyApp(
+                        sharedPref = sharedPref,
+                        prefEditor = prefEditor
+                    )
                 } else {
                     AuthScreen(
                         sharedPref = sharedPref,

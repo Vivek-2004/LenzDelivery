@@ -85,9 +85,10 @@ import java.util.Locale
 
 @Composable
 fun TransitOrderDetails(
-    order: RiderOrder,
+    riderOrder: RiderOrder,
     deliveryViewModel: DeliveryViewModel
 ) {
+    val order by remember(riderOrder) { mutableStateOf(riderOrder) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val dateFormatter = DateTimeFormatter
@@ -148,6 +149,13 @@ fun TransitOrderDetails(
     }
 
     if (otpVerifyToast.isNotEmpty()) {
+        if (otpVerifyToast == "OTP Verified Successfully") {
+            if (!order.isPickupVerified) {
+                order.isPickupVerified = true
+            } else {
+                order.isDropVerified = true
+            }
+        }
         isLoading = false
         Toast.makeText(context, otpVerifyToast, Toast.LENGTH_SHORT).show()
         otpVerifyToast = ""

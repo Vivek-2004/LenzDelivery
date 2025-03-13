@@ -89,7 +89,8 @@ fun RiderLogIn(
 
     if (loginConfirmation) {
         MyApp(
-            sharedPref = sharedPref
+            sharedPref = sharedPref,
+            prefEditor = prefEditor
         )
     } else {
         Column(

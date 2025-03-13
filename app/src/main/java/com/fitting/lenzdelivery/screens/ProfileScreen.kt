@@ -1,6 +1,7 @@
 package com.fitting.lenzdelivery.screens
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,13 +19,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,9 +34,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -56,39 +53,30 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.core.net.toUri
 import com.fitting.lenzdelivery.DeliveryViewModel
+import com.fitting.lenzdelivery.MainActivity
 import com.fitting.lenzdelivery.R
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 
 @Composable
 fun ProfileScreen(
-    deliveryViewModel: DeliveryViewModel
+    deliveryViewModel: DeliveryViewModel,
+    prefEditor: SharedPreferences.Editor
 ) {
     deliveryViewModel.getRiderDetails()
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
-    var errorMessage by remember { mutableStateOf("") }
-    var showEditDialog by remember { mutableStateOf(false) }
-    var updatePhone by remember { mutableStateOf(false) }
     var updateRider by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-    var phoneNumber by remember { mutableStateOf("") }
 
     val riderState by deliveryViewModel.riderDetails.collectAsState()
     val primaryColor = Color("#38b000".toColorInt())
-
-    LaunchedEffect(riderState) {
-        riderState?.phone?.let { phoneNumber = it }
-    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -110,40 +98,14 @@ fun ProfileScreen(
                         else -> Color.Red
                     }
 
-                    LaunchedEffect(updatePhone) {
-                        if (updatePhone) {
-                            try {
-                                withContext(Dispatchers.IO) {
-                                    deliveryViewModel.editRiderContact(
-                                        riderId = rider.riderId.toInt(),
-                                        newPhoneNumber = phoneNumber
-                                    )
-                                }
-                                Toast.makeText(
-                                    context, "Phone number updated", Toast.LENGTH_SHORT
-                                ).show()
-                            } catch (e: Exception) {
-                                Toast.makeText(
-                                    context, "Update failed: ${e.message}", Toast.LENGTH_SHORT
-                                ).show()
-                            } finally {
-                                updatePhone = false
-                                showEditDialog = false
-                                deliveryViewModel.getRiderDetails()
-                            }
-                        }
-                    }
-
                     LaunchedEffect(updateRider) {
                         if (updateRider) {
                             try {
-                                withContext(Dispatchers.IO) {
-                                    deliveryViewModel.editRiderWorkingStatus(
-                                        riderId = rider.riderId.toInt(),
-                                        newStatus = !rider.isWorking
-                                    )
-                                }
-                                delay(1500)
+                                deliveryViewModel.editRiderWorkingStatus(
+                                    riderId = rider.riderId.toInt(),
+                                    newStatus = !rider.isWorking
+                                )
+                                delay(1000)
                                 deliveryViewModel.getRiderDetails()
                             } catch (e: Exception) {
                                 Toast.makeText(
@@ -152,6 +114,7 @@ fun ProfileScreen(
                                     Toast.LENGTH_SHORT
                                 ).show()
                             } finally {
+                                delay(1200)
                                 updateRider = false
                                 isLoading = false
                             }
@@ -217,35 +180,51 @@ fun ProfileScreen(
                                     .padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Text(
-                                    text = "Rider Details",
-                                    fontSize = 24.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = primaryColor
-                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Rider Details",
+                                        fontSize = 24.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = primaryColor
+                                    )
+
+                                    IconButton(
+                                        onClick = {
+                                            Toast.makeText(
+                                                context,
+                                                "Logging Rider Out...",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            prefEditor.putBoolean("isLoggedIn", false).apply()
+                                            val intent =
+                                                Intent(context, MainActivity::class.java).apply {
+                                                    flags =
+                                                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                                }
+                                            context.startActivity(intent)
+                                        },
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .clip(CircleShape)
+                                            .background(Color.Red.copy(alpha = 0.1f))
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.Logout,
+                                            contentDescription = "Logout",
+                                            tint = Color.Red
+                                        )
+                                    }
+                                }
 
                                 HorizontalDivider(color = Color.LightGray.copy(alpha = 0.7f))
 
                                 InfoRow(label = "Rider ID", value = rider.riderId)
                                 InfoRow(label = "Name", value = rider.name)
-
-                                InfoRow(
-                                    label = "Phone", value = "+91 $phoneNumber", trailingContent = {
-                                        IconButton(
-                                            onClick = { showEditDialog = true },
-                                            modifier = Modifier
-                                                .size(40.dp)
-                                                .clip(CircleShape)
-                                                .background(primaryColor.copy(alpha = 0.1f))
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Rounded.Edit,
-                                                contentDescription = "Edit Phone Number",
-                                                tint = primaryColor
-                                            )
-                                        }
-                                    })
-
+                                InfoRow(label = "Phone", value = "+91 ${rider.phone}")
                                 InfoRow(label = "Email", value = rider.email)
                                 InfoRow(label = "Vehicle Number", value = rider.vehicleNumber)
 
@@ -260,76 +239,13 @@ fun ProfileScreen(
                 }
             }
         }
-
-        if (showEditDialog) {
-            AlertDialog(onDismissRequest = {
-                showEditDialog = false
-                errorMessage = ""
-            }, title = {
-                Text(
-                    text = "Edit Contact Number", fontSize = 20.sp, fontWeight = FontWeight.Bold
-                )
-            }, text = {
-                Column {
-                    OutlinedTextField(
-                        value = phoneNumber,
-                        onValueChange = { phoneNumber = it },
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Number
-                        ),
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Enter New Number") },
-                        label = { Text("+91") },
-                        isError = errorMessage.isNotEmpty()
-                    )
-
-                    if (errorMessage.isNotEmpty()) {
-                        Text(
-                            text = errorMessage,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                }
-            }, confirmButton = {
-                TextButton(onClick = {
-                    when {
-                        phoneNumber.length != 10 -> {
-                            errorMessage = "Phone Number must be 10 Digits"
-                        }
-
-                        phoneNumber == riderState?.phone -> {
-                            errorMessage = "No changes detected"
-                        }
-
-                        else -> {
-                            updatePhone = true
-                            errorMessage = ""
-                        }
-                    }
-                }) {
-                    Text("Update", fontSize = 16.sp, color = primaryColor)
-                }
-            }, dismissButton = {
-                TextButton(onClick = {
-                    errorMessage = ""
-                    showEditDialog = false
-                }) {
-                    Text("Cancel", fontSize = 16.sp)
-                }
-            })
-        }
     }
 }
 
 @Composable
 fun InfoRow(
     label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    trailingContent: @Composable (() -> Unit)? = null
+    value: String
 ) {
     val labelColor = MaterialTheme.colorScheme.primary
     val valueColor = MaterialTheme.colorScheme.onSurface
@@ -337,7 +253,7 @@ fun InfoRow(
     val accentColor = MaterialTheme.colorScheme.tertiary
 
     Card(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
@@ -394,9 +310,6 @@ fun InfoRow(
                     maxLines = 1
                 )
             }
-
-            // Add trailing content if provided
-            trailingContent?.invoke()
         }
     }
 }

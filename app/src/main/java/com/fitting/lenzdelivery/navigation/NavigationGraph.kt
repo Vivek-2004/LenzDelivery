@@ -39,7 +39,10 @@ import com.fitting.lenzdelivery.screens.component_holders.PaymentsHistory
 import com.fitting.lenzdelivery.screens.component_holders.details.PickupDetails
 
 @Composable
-fun MyApp(sharedPref: SharedPreferences) {
+fun MyApp(
+    sharedPref: SharedPreferences,
+    prefEditor: SharedPreferences.Editor
+) {
     val riderId: String? = sharedPref.getString("riderId", "")
 
     val deliveryViewModelInstance: DeliveryViewModel = viewModel(
@@ -120,7 +123,8 @@ fun MyApp(sharedPref: SharedPreferences) {
                 }
                 composable(route = NavigationDestination.Profile.name) {
                     ProfileScreen(
-                        deliveryViewModel = deliveryViewModelInstance
+                        deliveryViewModel = deliveryViewModelInstance,
+                        prefEditor = prefEditor
                     )
                 }
                 composable(route = NavigationDestination.PaymentsHistory.name) {

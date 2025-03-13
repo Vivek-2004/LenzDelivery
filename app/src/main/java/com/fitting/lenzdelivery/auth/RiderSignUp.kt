@@ -1,6 +1,7 @@
 package com.fitting.lenzdelivery.auth
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -59,6 +60,10 @@ import java.util.Locale
 fun RiderSignUp(
     onNavigateToLogin: () -> Unit
 ) {
+    BackHandler {
+        onNavigateToLogin()
+    }
+
     val textFieldColors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = Color(0xFFE53935),
         unfocusedBorderColor = Color.Gray,
@@ -109,7 +114,8 @@ fun RiderSignUp(
                 responseMessage = when (response.code()) {
                     201 -> "Rider Registered Successfully"
                     400 -> "Missing Required Fields"
-                    401 -> "Rider Already Exists"
+                    401 -> "Incorrect Auth Key"
+                    409 -> "Rider Already Exists"
                     404 -> "Admin Not Found"
                     else -> "Server Error"
                 }
