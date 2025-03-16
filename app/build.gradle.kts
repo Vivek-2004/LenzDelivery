@@ -14,8 +14,8 @@ android {
         applicationId = "com.fitting.lenzdelivery"
         minSdk = 26
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.6"
+        versionCode = 8
+        versionName = "1.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -52,8 +52,8 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.socket.io.client)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.firebase.messaging.ktx)
 
     implementation(libs.play.app.update.ktx)
     implementation(libs.androidx.core.ktx)
