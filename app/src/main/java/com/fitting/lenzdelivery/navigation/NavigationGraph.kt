@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +41,7 @@ import com.fitting.lenzdelivery.screens.PickupScreen
 import com.fitting.lenzdelivery.screens.ProfileScreen
 import com.fitting.lenzdelivery.screens.component_holders.PaymentsHistory
 import com.fitting.lenzdelivery.screens.component_holders.details.PickupDetails
+import kotlinx.coroutines.delay
 
 @Composable
 fun MyApp(
@@ -52,6 +55,12 @@ fun MyApp(
     )
 
     val riderState by deliveryViewModelInstance.riderDetails.collectAsState()
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        delay(5000)
+        isLoading = false
+    }
 
     if (riderState == null) {
         Column(
@@ -61,11 +70,15 @@ fun MyApp(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(100.dp),
-                strokeWidth = 11.dp,
-                color = Color.Black.copy(alpha = 0.8f)
-            )
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(100.dp),
+                    strokeWidth = 11.dp,
+                    color = Color.Black.copy(alpha = 0.8f)
+                )
+            } else {
+                Text("Some Error Occurred")
+            }
         }
     } else {
         globalRiderId = riderState!!.riderId
