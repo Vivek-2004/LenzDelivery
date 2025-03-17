@@ -4,6 +4,7 @@ import com.fitting.lenzdelivery.models.AssignDeliveryReqBody
 import com.fitting.lenzdelivery.models.AssignPickupReqBody
 import com.fitting.lenzdelivery.models.ChangeWorkingStatus
 import com.fitting.lenzdelivery.models.EditPhoneNumber
+import com.fitting.lenzdelivery.models.FcmToken
 import com.fitting.lenzdelivery.models.LogInRider
 import com.fitting.lenzdelivery.models.LogInRiderResponse
 import com.fitting.lenzdelivery.models.OtpCode
@@ -28,13 +29,13 @@ import retrofit2.http.Path
 import java.util.concurrent.TimeUnit
 
 private val okHttpClient = OkHttpClient.Builder()
-    .connectTimeout(60, TimeUnit.SECONDS)
-    .readTimeout(60, TimeUnit.SECONDS)
-    .writeTimeout(60, TimeUnit.SECONDS)
+    .connectTimeout(30, TimeUnit.SECONDS)
+    .readTimeout(30, TimeUnit.SECONDS)
+    .writeTimeout(30, TimeUnit.SECONDS)
     .build()
 
 private val retrofit = Retrofit.Builder()
-    .baseUrl("https://lenz-backend.onrender.com/api/")
+    .baseUrl("https://lenzshop.duckdns.org/api/")
     .client(okHttpClient)
     .addConverterFactory(GsonConverterFactory.create())
     .build()
@@ -124,5 +125,11 @@ interface ApiService {
     suspend fun patchCompleteTransit(
         @Path("orderKey") orderKey: String,
         @Body riderId: PatchCompleteTransit
+    ): Response<ResponseBody>
+
+    @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
+    @POST("riders/update-fcm-token")
+    suspend fun updateFcmToken(
+        @Body reqBody: FcmToken
     ): Response<ResponseBody>
 }

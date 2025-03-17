@@ -32,6 +32,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.DeliveryViewModelFactory
+import com.fitting.lenzdelivery.globalRiderId
+import com.fitting.lenzdelivery.registerFcmTokenAfterLogin
 import com.fitting.lenzdelivery.screens.EarningsScreen
 import com.fitting.lenzdelivery.screens.PickupScreen
 import com.fitting.lenzdelivery.screens.ProfileScreen
@@ -66,6 +68,8 @@ fun MyApp(
             )
         }
     } else {
+        globalRiderId = riderState!!.riderId
+        registerFcmTokenAfterLogin(globalRiderId)
         val navController = rememberNavController()
         val currentBackStackEntry by navController.currentBackStackEntryAsState()
         var currentScreen = currentBackStackEntry?.destination?.route

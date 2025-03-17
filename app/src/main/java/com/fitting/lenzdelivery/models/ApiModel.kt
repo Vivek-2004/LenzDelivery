@@ -118,3 +118,8 @@ data class VerifyAdminPickupOtpReqBody(
 data class PatchCompleteTransit(
     val riderId: String
 )
+
+data class FcmToken(
+    val riderId: String,
+    val fcmToken: String
+)

@@ -1,5 +1,16 @@
 package com.fitting.lenzdelivery
 
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.fitting.lenzdelivery.models.FcmToken
+import com.fitting.lenzdelivery.network.deliveryService
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -23,4 +34,33 @@ fun String.toIST(): String {
         .appendText(ChronoField.AMPM_OF_DAY, mapOf(0L to "a.m.", 1L to "p.m."))
         .toFormatter(Locale.ENGLISH)
     return istDateTime.format(formatter)
+}
+
+var globalRiderId by mutableStateOf("")
+
+fun sendTokenToServer(riderId: String, token: String) {
+    Log.d("SEND", token)
+    val reqBody = FcmToken(
+        riderId = riderId,
+        fcmToken = token
+    )
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            deliveryService.updateFcmToken(
+                reqBody = reqBody
+            )
+        } catch (_:Exception) {
+        }
+    }
+}
+
+fun registerFcmTokenAfterLogin(riderId: String) {
+    FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+        if (!task.isSuccessful) {
+            Log.w("FCM", "Fetching FCM registration token failed", task.exception)
+            return@OnCompleteListener
+        }
+        val token = task.result
+        sendTokenToServer(riderId, token)
+    })
 }
