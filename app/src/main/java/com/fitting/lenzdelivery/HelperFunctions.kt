@@ -1,10 +1,14 @@
 package com.fitting.lenzdelivery
 
+import android.app.ActivityManager
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat.getSystemService
 import com.fitting.lenzdelivery.models.FcmToken
+import com.fitting.lenzdelivery.models.NotificationData
 import com.fitting.lenzdelivery.network.deliveryService
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
@@ -49,7 +53,7 @@ fun sendTokenToServer(riderId: String, token: String) {
             deliveryService.updateFcmToken(
                 reqBody = reqBody
             )
-        } catch (_:Exception) {
+        } catch (_: Exception) {
         }
     }
 }
@@ -63,4 +67,15 @@ fun registerFcmTokenAfterLogin(riderId: String) {
         val token = task.result
         sendTokenToServer(riderId, token)
     })
+}
+
+fun mapToNotificationData(fcmData: Map<String, String>): NotificationData {
+    require(fcmData.containsKey("order_key") && fcmData.containsKey("operation")) {
+        "Missing required keys: order_key or operation"
+    }
+
+    return NotificationData(
+        orderKey = fcmData["order_key"]!!,
+        operation = fcmData["operation"]!!
+    )
 }

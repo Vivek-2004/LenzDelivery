@@ -4,15 +4,19 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import com.fitting.lenzdelivery.MainActivity
+import com.fitting.lenzdelivery.OrderEventBus
 import com.fitting.lenzdelivery.R
 import com.fitting.lenzdelivery.globalRiderId
+import com.fitting.lenzdelivery.mapToNotificationData
 import com.fitting.lenzdelivery.sendTokenToServer
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class CloudNotificationService : FirebaseMessagingService() {
 
@@ -24,19 +28,45 @@ class CloudNotificationService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        var data = "GAAND"
-        if (remoteMessage.data.isNotEmpty()) {
-            data = remoteMessage.data.toString()
-            Log.d("FCM", remoteMessage.data.toString())
-        }
         remoteMessage.notification?.let {
             showNotification(
                 title = it.title,
-//                message = it.body
-                message = data
+                message = it.body
             )
         }
+        remoteMessage.data.let { fcmData ->
+            val formattedData = mapToNotificationData(fcmData)
+            CoroutineScope(Dispatchers.IO).launch {
+                OrderEventBus.emitNewOrder(formattedData)
+            }
+        }
     }
+
+//    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+//        // Handle data messages
+//        if (remoteMessage.data.isNotEmpty()) {
+//            val formattedData = mapToNotificationData(remoteMessage.data)
+//            CoroutineScope(Dispatchers.IO).launch {
+//                OrderEventBus.emitNewOrder(formattedData)
+//            }
+//        }
+//
+//        //The system handles notification payloads in the background, so we only need to display it ourselves when the app is in the foreground
+//        if(remoteMessage.notification != null && isAppInForeground()){
+//            showNotification(
+//                title = remoteMessage.notification?.title,
+//                message = remoteMessage.notification?.body
+//            )
+//        }
+//    }
+//
+//    fun isAppInForeground(): Boolean {
+//        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+//        val runningProcesses = activityManager.runningAppProcesses ?: return false
+//        return runningProcesses.any {
+//            it.processName == packageName && it.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+//        }
+//    }
 
     private fun showNotification(title: String?, message: String?) {
         val soundUri = "android.resource://$packageName/${R.raw.vivek}".toUri()
@@ -62,6 +92,7 @@ class CloudNotificationService : FirebaseMessagingService() {
             .setContentIntent(pendingIntent)
             .build()
 
-        notificationManager.notify(0, notification)
+        val notificationId = System.currentTimeMillis().toInt()
+        notificationManager.notify(notificationId, notification)
     }
 }

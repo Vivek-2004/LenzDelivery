@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
         appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
         checkForUpdates()
 
-        val sharedPref = getSharedPreferences("LenZDelivery", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("LenZDeliveryKey", Context.MODE_PRIVATE)
         val prefEditor = sharedPref.edit()
 
         if (!sharedPref.contains("isLoggedIn")) {

@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.fitting.lenzdelivery.models.AssignDeliveryReqBody
 import com.fitting.lenzdelivery.models.AssignPickupReqBody
 import com.fitting.lenzdelivery.models.ChangeWorkingStatus
-import com.fitting.lenzdelivery.models.EditPhoneNumber
 import com.fitting.lenzdelivery.models.OtpCode
 import com.fitting.lenzdelivery.models.PatchCompleteTransit
 import com.fitting.lenzdelivery.models.RiderDetails
@@ -26,7 +25,7 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
 
     private val _deliveryService = deliveryService
 
-    val currentRiderId = riderId
+    private val currentRiderId = riderId
     var riderObjectId by mutableStateOf("")
         private set
 
@@ -44,13 +43,8 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
 
     private fun observeNewOrders() {
         viewModelScope.launch {
-            OrderEventBus.newOrders.collect { newOrder ->
-                if (newOrder.riderId == null) {
-                    riderOrders = (riderOrders + newOrder)
-                        .distinctBy { it.orderKey }
-                } else {
-                    getRiderOrders()
-                }
+            OrderEventBus.newOrders.collect {
+                getRiderOrders()
             }
         }
     }
@@ -63,23 +57,6 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
                 )
                 _riderDetails.value = ridersResponse
                 riderObjectId = ridersResponse._id
-            } catch (_: Exception) {
-            }
-        }
-    }
-
-    fun editRiderContact(
-        riderId: Int,
-        newPhoneNumber: String
-    ) {
-        viewModelScope.launch {
-            try {
-                _deliveryService.editRiderPhone(
-                    riderId = riderId,
-                    newPhoneNumber = EditPhoneNumber(
-                        newPhoneNumber = newPhoneNumber
-                    )
-                )
             } catch (_: Exception) {
             }
         }
@@ -121,8 +98,7 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
                     groupOrderId = groupOrderId,
                     pickupRiderId = requestBody
                 )
-            } catch (e: Exception) {
-                println(e)
+            } catch (_: Exception) {
             }
         }
     }
@@ -137,11 +113,10 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
                     adminPickupKey = pickupKey,
                     deliveryRiderId = pickupRiderId
                 )
-                val response = _deliveryService.assignDeliveryRider(
+                _deliveryService.assignDeliveryRider(
                     deliveryReqBody = reqBody
                 )
-            } catch (e: HttpException) {
-                println(e)
+            } catch (_: HttpException) {
             }
         }
     }
@@ -237,15 +212,13 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
     ) {
         viewModelScope.launch {
             try {
-                val response = _deliveryService.patchCompleteTransit(
+                _deliveryService.patchCompleteTransit(
                     orderKey = orderKey,
                     riderId = PatchCompleteTransit(
                         riderId = riderId
                     )
                 )
-
-            } catch (e: Exception) {
-                println(e)
+            } catch (_: Exception) {
             }
         }
     }

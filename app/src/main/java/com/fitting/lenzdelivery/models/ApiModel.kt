@@ -63,10 +63,6 @@ data class RiderOrder(
     @SerializedName("grouped_orders") val groupedOrders: List<GroupedOrders>
 )
 
-data class EditPhoneNumber(
-    val newPhoneNumber: String
-)
-
 data class ChangeWorkingStatus(
     val newStatus: Boolean
 )
@@ -122,4 +118,9 @@ data class PatchCompleteTransit(
 data class FcmToken(
     val riderId: String,
     val fcmToken: String
+)
+
+data class NotificationData(
+    @SerializedName("order_key") val orderKey: String,
+    val operation: String
 )

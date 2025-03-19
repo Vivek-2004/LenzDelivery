@@ -3,7 +3,6 @@ package com.fitting.lenzdelivery.network
 import com.fitting.lenzdelivery.models.AssignDeliveryReqBody
 import com.fitting.lenzdelivery.models.AssignPickupReqBody
 import com.fitting.lenzdelivery.models.ChangeWorkingStatus
-import com.fitting.lenzdelivery.models.EditPhoneNumber
 import com.fitting.lenzdelivery.models.FcmToken
 import com.fitting.lenzdelivery.models.LogInRider
 import com.fitting.lenzdelivery.models.LogInRiderResponse
@@ -52,13 +51,6 @@ interface ApiService {
     suspend fun getRiderDetails(
         @Path("riderId") riderId: String
     ): RiderDetails
-
-    @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
-    @PUT("riders/{riderId}/edit-phone-number")
-    suspend fun editRiderPhone(
-        @Path("riderId") riderId: Int,
-        @Body newPhoneNumber: EditPhoneNumber
-    )
 
     @Headers("lenz-api-key: a99ed2023194a3356d37634474417f8b")
     @PUT("riders/{riderId}/edit-working-status")
