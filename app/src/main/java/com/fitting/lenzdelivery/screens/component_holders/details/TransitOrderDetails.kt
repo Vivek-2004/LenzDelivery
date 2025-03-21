@@ -143,6 +143,7 @@ fun TransitOrderDetails(
         } finally {
             deliveryViewModel.getRiderOrders()
             verifyOtp = false
+            isLoading = false
             enteredOtp = ""
             currentGroupOrderId = ""
         }
@@ -156,7 +157,6 @@ fun TransitOrderDetails(
                 order.isDropVerified = true
             }
         }
-        isLoading = false
         Toast.makeText(context, otpVerifyToast, Toast.LENGTH_SHORT).show()
         otpVerifyToast = ""
     }

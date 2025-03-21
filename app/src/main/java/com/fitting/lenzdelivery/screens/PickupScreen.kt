@@ -53,7 +53,9 @@ fun PickupScreen(
     deliveryViewModel: DeliveryViewModel = viewModel(),
     navController: NavController,
 ) {
-    deliveryViewModel.getRiderOrders()
+    LaunchedEffect(Unit) {
+        deliveryViewModel.getRiderOrders()
+    }
     val scrollState = rememberScrollState()
     val listState = rememberLazyListState()
     val scrollBarWidth = 5.dp

@@ -61,6 +61,7 @@ import androidx.core.net.toUri
 import com.fitting.lenzdelivery.DeliveryViewModel
 import com.fitting.lenzdelivery.MainActivity
 import com.fitting.lenzdelivery.R
+import com.fitting.lenzdelivery.deleteFcmTokenAfterLogout
 import kotlinx.coroutines.delay
 
 @Composable
@@ -199,6 +200,7 @@ fun ProfileScreen(
                                                 "Logging Rider Out...",
                                                 Toast.LENGTH_SHORT
                                             ).show()
+                                            deleteFcmTokenAfterLogout()
                                             prefEditor.putBoolean("isLoggedIn", false).apply()
                                             val intent =
                                                 Intent(context, MainActivity::class.java).apply {

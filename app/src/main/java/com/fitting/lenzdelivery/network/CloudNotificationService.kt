@@ -42,32 +42,6 @@ class CloudNotificationService : FirebaseMessagingService() {
         }
     }
 
-//    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-//        // Handle data messages
-//        if (remoteMessage.data.isNotEmpty()) {
-//            val formattedData = mapToNotificationData(remoteMessage.data)
-//            CoroutineScope(Dispatchers.IO).launch {
-//                OrderEventBus.emitNewOrder(formattedData)
-//            }
-//        }
-//
-//        //The system handles notification payloads in the background, so we only need to display it ourselves when the app is in the foreground
-//        if(remoteMessage.notification != null && isAppInForeground()){
-//            showNotification(
-//                title = remoteMessage.notification?.title,
-//                message = remoteMessage.notification?.body
-//            )
-//        }
-//    }
-//
-//    fun isAppInForeground(): Boolean {
-//        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-//        val runningProcesses = activityManager.runningAppProcesses ?: return false
-//        return runningProcesses.any {
-//            it.processName == packageName && it.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
-//        }
-//    }
-
     private fun showNotification(title: String?, message: String?) {
         val soundUri = "android.resource://$packageName/${R.raw.vivek}".toUri()
         val channelId = "order_notifications"
