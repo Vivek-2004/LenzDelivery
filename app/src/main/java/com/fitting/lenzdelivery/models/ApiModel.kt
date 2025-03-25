@@ -9,6 +9,7 @@ data class RiderDetails(
     val phone: String,
     val email: String,
     val vehicleNumber: String,
+    val lenzAdminId: LenzAdmin,
     var isAvailable: Boolean,
     val isWorking: Boolean,
     val totalOrders: Int,
@@ -18,7 +19,17 @@ data class RiderDetails(
     val createdAt: String
 )
 
-data class ShopAddress(
+data class LenzAdmin(
+    val address: Address,
+    val _id: String,
+    val name: String,
+    val email: String,
+    val phone: String,
+    val orderPhone: String,
+    val adminId: String
+)
+
+data class Address(
     val line1: String,
     val line2: String,
     val landmark: String,
@@ -32,7 +43,7 @@ data class GroupedOrders(
     val dealerName: String,
     val phone: String,
     val alternatePhone: String,
-    val address: ShopAddress,
+    val address: Address,
     val orders: List<String>
 )
 
@@ -41,7 +52,7 @@ data class ShopDetails(
     val dealerName: String,
     val phone: String,
     val alternatePhone: String,
-    val address: ShopAddress
+    val address: Address
 )
 
 data class GroupOrders(

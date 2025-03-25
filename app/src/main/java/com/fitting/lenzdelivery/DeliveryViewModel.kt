@@ -52,11 +52,11 @@ class DeliveryViewModel(riderId: String) : ViewModel() {
     fun getRiderDetails() {
         viewModelScope.launch {
             try {
-                val ridersResponse = _deliveryService.getRiderDetails(
+                val riderResponse = _deliveryService.getRiderDetails(
                     riderId = currentRiderId
                 )
-                _riderDetails.value = ridersResponse
-                riderObjectId = ridersResponse._id
+                _riderDetails.value = riderResponse
+                riderObjectId = riderResponse._id
             } catch (_: Exception) {
             }
         }

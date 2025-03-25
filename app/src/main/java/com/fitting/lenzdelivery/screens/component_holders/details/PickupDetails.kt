@@ -30,6 +30,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,9 +47,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.fitting.lenzdelivery.DeliveryViewModel
+import com.fitting.lenzdelivery.models.Address
+import com.fitting.lenzdelivery.models.LenzAdmin
 import com.fitting.lenzdelivery.models.RiderOrder
-import com.fitting.lenzdelivery.models.ShopAddress
 import com.fitting.lenzdelivery.screens.component_holders.SwipeToButton
+import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -55,6 +63,7 @@ fun PickupDetails(
     navController: NavController
 ) {
     val scrollState = rememberScrollState()
+    val riderState by deliveryViewModel.riderDetails.collectAsState()
     val order = deliveryViewModel.riderOrders.first { it.orderKey == orderKey }
     val dateFormatter = DateTimeFormatter
         .ofPattern("MMM dd, yyyy hh:mm a")
@@ -62,6 +71,23 @@ fun PickupDetails(
 
     val createdAtInstant = Instant.parse(order.createdAt)
     val formattedDate = dateFormatter.format(createdAtInstant)
+
+    var isSwiped by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isSwiped) {
+        if (!isSwiped) return@LaunchedEffect
+        if (order.deliveryType == "pickup") {
+            deliveryViewModel.assignPickupRider(
+                groupOrderId = order.groupOrderIds.first().groupOrderId
+            )
+        } else {
+            deliveryViewModel.assignDeliveryRider(
+                pickupKey = order.orderKey
+            )
+        }
+        delay(1000)
+        deliveryViewModel.getRiderOrders()
+    }
 
     if (order.riderId != null) {
         navController.popBackStack()
@@ -86,7 +112,7 @@ fun PickupDetails(
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text(
-                            text = "ID: ${order.orderKey}",
+                            text = "ID: #${order.orderKey}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
@@ -151,7 +177,12 @@ fun PickupDetails(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                LocationDetailsSection(order = order)
+                riderState?.lenzAdminId?.let { adminAddress ->
+                    LocationDetailsSection(
+                        order = order,
+                        adminDetails = adminAddress
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -163,16 +194,7 @@ fun PickupDetails(
             ) {
                 SwipeToButton(
                     onSwipeComplete = {
-                        if (order.deliveryType == "pickup") {
-                            deliveryViewModel.assignPickupRider(
-                                groupOrderId = order.groupOrderIds.first().groupOrderId
-                            )
-                        } else {
-                            deliveryViewModel.assignDeliveryRider(
-                                pickupKey = order.orderKey
-                            )
-                        }
-                        navController.popBackStack()
+                        isSwiped = true
                     }
                 )
             }
@@ -181,7 +203,10 @@ fun PickupDetails(
 }
 
 @Composable
-fun LocationDetailsSection(order: RiderOrder) {
+fun LocationDetailsSection(
+    order: RiderOrder,
+    adminDetails: LenzAdmin
+) {
     if (order.deliveryType == "pickup") {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -219,7 +244,6 @@ fun LocationDetailsSection(order: RiderOrder) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Drop At Section (LenZ Admin)
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
@@ -243,7 +267,9 @@ fun LocationDetailsSection(order: RiderOrder) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                LenzAddressCard()
+                LenzAddressCard(
+                    lenzAdmin = adminDetails
+                )
             }
         }
     } else {
@@ -270,7 +296,9 @@ fun LocationDetailsSection(order: RiderOrder) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                LenzAddressCard()
+                LenzAddressCard(
+                    lenzAdmin = adminDetails
+                )
             }
         }
 
@@ -318,7 +346,7 @@ fun LocationDetailsSection(order: RiderOrder) {
 fun ShopDetailCard(
     shopName: String,
     dealerName: String,
-    address: ShopAddress,
+    address: Address,
     phone: String
 ) {
     val context = LocalContext.current
@@ -442,7 +470,9 @@ fun ShopDetailCard(
 }
 
 @Composable
-fun LenzAddressCard() {
+fun LenzAddressCard(
+    lenzAdmin: LenzAdmin
+) {
     val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -481,7 +511,7 @@ fun LenzAddressCard() {
                     )
 
                     Text(
-                        text = "Injamul Mullick",
+                        text = lenzAdmin.name,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -508,19 +538,19 @@ fun LenzAddressCard() {
 
                 Column {
                     Text(
-                        text = "MG Road, Shalimar, Behind Ramesh Opticians",
+                        text = "${lenzAdmin.address.line1}, ${lenzAdmin.address.line2}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Text(
-                        text = "Landmark: Near Congress Bhavan",
+                        text = lenzAdmin.address.landmark,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Text(
-                        text = "Nashik - 422001",
+                        text = "${lenzAdmin.address.city} - ${lenzAdmin.address.pinCode}",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium
                     )
@@ -535,7 +565,7 @@ fun LenzAddressCard() {
                     .height(48.dp),
                 onClick = {
                     val intent = Intent(Intent.ACTION_DIAL).apply {
-                        data = "tel:+918584932580".toUri()
+                        data = "tel:+91${lenzAdmin.orderPhone.takeLast(10)}".toUri()
                     }
                     context.startActivity(intent)
                 },

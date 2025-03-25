@@ -48,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -236,7 +237,10 @@ fun ProfileScreen(
                             }
                         }
 
-                        ContactCard()
+                        ContactCard(
+                            adminPhone = rider.lenzAdminId.phone,
+                            adminMail = rider.lenzAdminId.email
+                        )
                     }
                 }
             }
@@ -354,7 +358,10 @@ private fun StatusIndicator(isWorking: Boolean, isAvailable: Boolean) {
 }
 
 @Composable
-private fun ContactCard() {
+private fun ContactCard(
+    adminPhone: String,
+    adminMail: String
+) {
     val context = LocalContext.current
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -382,25 +389,27 @@ private fun ContactCard() {
             )
 
             ContactMethod(
-                icon = Icons.Default.Call, text = "+91 8967310388", onClick = {
+                icon = Icons.Default.Call, text = "+91 ${adminPhone.takeLast(10)}", onClick = {
                     val intent = Intent(Intent.ACTION_DIAL).apply {
-                        data = "tel:+918967310388".toUri()
+                        data = "tel:$adminPhone".toUri()
                     }
                     context.startActivity(intent)
                 })
 
             ContactMethod(
-                icon = painterResource(R.drawable.whatsapp), text = "+91 8967310388", onClick = {
+                icon = painterResource(R.drawable.whatsapp),
+                text = "+91 ${adminPhone.takeLast(10)}",
+                onClick = {
                     val intent = Intent(
-                        Intent.ACTION_VIEW, "https://wa.me/918967310388".toUri()
+                        Intent.ACTION_VIEW, "https://wa.me/${adminPhone.takeLast(12)}".toUri()
                     )
                     context.startActivity(intent)
                 })
 
             ContactMethod(
-                icon = Icons.Default.Email, text = "connect.lenz@gmail.com", onClick = {
+                icon = Icons.Default.Email, text = adminMail, onClick = {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = "mailto:connect.lenz@gmail.com".toUri()
+                        data = "mailto:$adminMail".toUri()
                     }
                     context.startActivity(intent)
                 })
@@ -430,7 +439,7 @@ private fun ContactMethod(
                 )
             }
 
-            is androidx.compose.ui.graphics.painter.Painter -> {
+            is Painter -> {
                 Icon(
                     painter = icon,
                     contentDescription = null,

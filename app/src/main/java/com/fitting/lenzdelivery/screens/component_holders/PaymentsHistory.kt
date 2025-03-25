@@ -58,9 +58,14 @@ import kotlinx.coroutines.withContext
 fun PaymentsHistory(
     deliveryViewModel: DeliveryViewModel
 ) {
+    val listState = rememberLazyListState()
+    val pullToRefreshState = rememberPullToRefreshState()
     val riderState by deliveryViewModel.riderDetails.collectAsState()
+    val primaryGreen = Color("#38b000".toColorInt())
     var updateHistory by remember { mutableStateOf(true) }
     var isRefreshing by remember { mutableStateOf(false) }
+    val scrollBarWidth = 4.dp
+
     LaunchedEffect(updateHistory) {
         if (!updateHistory) return@LaunchedEffect
         try {
@@ -74,12 +79,6 @@ fun PaymentsHistory(
         }
     }
 
-
-    val primaryGreen = Color("#38b000".toColorInt())
-    val scrollBarWidth = 4.dp
-    val listState = rememberLazyListState()
-    val pullToRefreshState = rememberPullToRefreshState()
-
     if (isRefreshing) {
         LaunchedEffect(Unit) {
             updateHistory = true
@@ -88,7 +87,8 @@ fun PaymentsHistory(
         }
     }
 
-    if (deliveryViewModel.riderOrders.isEmpty()) {
+    if (deliveryViewModel.riderOrders.filter { it.riderId == deliveryViewModel.riderObjectId }
+            .isEmpty()) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -156,7 +156,6 @@ fun PaymentsHistory(
                 }
             }
         }
-
     } else {
         PullToRefreshBox(
             state = pullToRefreshState,

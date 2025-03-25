@@ -52,6 +52,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,10 +71,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.fitting.lenzdelivery.DeliveryViewModel
+import com.fitting.lenzdelivery.models.Address
 import com.fitting.lenzdelivery.models.GroupOrders
 import com.fitting.lenzdelivery.models.GroupedOrders
+import com.fitting.lenzdelivery.models.LenzAdmin
 import com.fitting.lenzdelivery.models.RiderOrder
-import com.fitting.lenzdelivery.models.ShopAddress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -89,6 +91,7 @@ fun TransitOrderDetails(
     deliveryViewModel: DeliveryViewModel
 ) {
     val order by remember(riderOrder) { mutableStateOf(riderOrder) }
+    val riderState by deliveryViewModel.riderDetails.collectAsState()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val dateFormatter = DateTimeFormatter
@@ -203,7 +206,12 @@ fun TransitOrderDetails(
         Spacer(modifier = Modifier.height(20.dp))
 
         // Location Details - Enhanced with Maps integration hint
-        LocationDetails(order = order)
+        riderState?.lenzAdminId?.let { admin ->
+            LocationDetails(
+                order = order,
+                admin = admin
+            )
+        }
 
         // Group Orders - Enhanced with better visual hierarchy
         if (order.isPickupVerified && order.isDropVerified) {
@@ -537,7 +545,10 @@ fun OrderInfoCards(
 }
 
 @Composable
-fun LocationDetails(order: RiderOrder) {
+fun LocationDetails(
+    order: RiderOrder,
+    admin: LenzAdmin
+) {
     if (order.deliveryType == "pickup") {
         Section(
             title = "Pickup From",
@@ -560,14 +571,20 @@ fun LocationDetails(order: RiderOrder) {
             title = "Drop At",
             icon = Icons.Default.PinDrop
         ) {
-            AdminAddressCard(order = order)
+            AdminAddressCard(
+                order = order,
+                admin = admin
+            )
         }
     } else {
         Section(
             title = "Pickup From",
             icon = Icons.Default.LocationOn
         ) {
-            AdminAddressCard(order = order)
+            AdminAddressCard(
+                order = order,
+                admin = admin
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -591,7 +608,7 @@ fun LocationDetails(order: RiderOrder) {
 fun ShopAddressCard(
     shopName: String,
     dealerName: String,
-    address: ShopAddress,
+    address: Address,
     phone: String,
     isPickupVerified: Boolean
 ) {
@@ -953,7 +970,10 @@ fun ExpandableOrderList(orders: List<String>) {
 }
 
 @Composable
-fun AdminAddressCard(order: RiderOrder) {
+fun AdminAddressCard(
+    order: RiderOrder,
+    admin: LenzAdmin
+) {
     val context = LocalContext.current
 
     Card(
@@ -1004,7 +1024,7 @@ fun AdminAddressCard(order: RiderOrder) {
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Injamul Mullick",
+                        text = admin.name,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1033,19 +1053,19 @@ fun AdminAddressCard(order: RiderOrder) {
 
                 Column {
                     Text(
-                        text = "MG Road, Shalimar",
+                        text = "${admin.address.line1}, ${admin.address.line2}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Text(
-                        text = "Near Congress Bhavan",
+                        text = admin.address.landmark,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        fontWeight = FontWeight.Medium
                     )
 
                     Text(
-                        text = "Nashik - 422001",
+                        text = "${admin.address.city} - ${admin.address.pinCode}",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium
                     )
@@ -1060,7 +1080,7 @@ fun AdminAddressCard(order: RiderOrder) {
                     .height(48.dp),
                 onClick = {
                     val intent = Intent(Intent.ACTION_DIAL).apply {
-                        data = "tel:+918584932580".toUri()
+                        data = "tel:+91${admin.orderPhone.takeLast(10)}".toUri()
                     }
                     context.startActivity(intent)
                 },

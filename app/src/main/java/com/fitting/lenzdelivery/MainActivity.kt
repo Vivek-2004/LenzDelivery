@@ -30,7 +30,6 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.android.play.core.ktx.isImmediateUpdateAllowed
 
 class MainActivity : ComponentActivity() {
-
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -53,7 +52,7 @@ class MainActivity : ComponentActivity() {
         appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
         checkForUpdates()
 
-        val sharedPref = getSharedPreferences("LenZDeliveryKey", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("LenzDeliveryService", Context.MODE_PRIVATE)
         val prefEditor = sharedPref.edit()
 
         if (!sharedPref.contains("isLoggedIn")) {
@@ -160,5 +159,4 @@ class MainActivity : ComponentActivity() {
         }
         notificationManager.createNotificationChannel(channel)
     }
-
 }
