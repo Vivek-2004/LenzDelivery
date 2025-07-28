@@ -87,8 +87,10 @@ fun PaymentsHistory(
         }
     }
 
-    if (deliveryViewModel.riderOrders.filter { it.riderId == deliveryViewModel.riderObjectId }
-            .isEmpty()) {
+    if (
+        deliveryViewModel.riderOrders.filter { it.riderId == deliveryViewModel.riderObjectId }
+            .isEmpty()
+    ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,

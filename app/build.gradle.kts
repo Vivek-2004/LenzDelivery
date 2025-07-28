@@ -8,14 +8,14 @@ plugins {
 
 android {
     namespace = "com.fitting.lenzdelivery"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.fitting.lenzdelivery"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 12
-        versionName = "25.03.2025"
+        targetSdk = 36
+        versionCode = 13
+        versionName = "29.07.2025"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

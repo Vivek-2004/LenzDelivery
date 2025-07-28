@@ -27,6 +27,7 @@ import retrofit2.http.Path
 import java.util.concurrent.TimeUnit
 
 const val LENZ_API_KEY = "a99ed202v335i6d3v763e447k4417f8b"
+const val BASE_URL = "https://lenz-backend-3m8v.onrender.com/api/"
 
 private val okHttpClient = OkHttpClient.Builder()
     .addInterceptor { chain ->
@@ -41,7 +42,7 @@ private val okHttpClient = OkHttpClient.Builder()
     .build()
 
 private val retrofit = Retrofit.Builder()
-    .baseUrl("http://13.201.223.127/api/")
+    .baseUrl(BASE_URL)
     .client(okHttpClient)
     .addConverterFactory(GsonConverterFactory.create())
     .build()
